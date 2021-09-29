@@ -1,0 +1,113 @@
+/* base styles */
+body {
+    background-color: darkcyan;
+}
+p {
+    background-color: white;
+    border-radius: 10px;
+    border: thin;
+    padding: 10px;
+    margin-left: auto;
+    margin-right: auto;
+}
+#Main {
+    background-color: lightblue;
+    border-radius: 10px;
+    margin: auto;
+    width: min-content;
+    padding-left: 4%;
+    padding-right: 4%;
+    padding-top: 2%;
+    padding-bottom: 2%;
+}
+form {
+    padding: 10px;
+    border-radius: 10px;
+    background-color: gray;
+    margin: auto;
+}
+#topNavBar {
+    background-color: lightgrey;
+    table-layout: fixed;
+    color: black;
+    width: 100%;
+}
+#topNavBar tr td {
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+    height: 45px;
+}
+#topNavBar tr td button{
+    width: 100%;
+    height: 100%;
+}
+iframe{
+    width: 100%;
+    height: 90%;
+}
+
+/* item listing styles */
+#itemTable{
+    margin-top: 5px;
+    width: 100%;
+    background-color: white;
+}
+#itemTable tr{
+    height: 60px;
+}
+#itemTable tr td{
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+    padding: 5px;
+}
+
+/* notes styles */
+#notesTable{
+    width: 100%;
+    background-color: whitesmoke;
+}
+#notesTable tr td{
+    height: 20px;
+}
+#notesTable tr td *{
+    width: 100%;
+}
+#notesTable tr td textarea{
+    height: 400px;
+}
+
+/* chat styles */
+#chatTable{
+    width: 100%;
+    height: 100%;
+}
+
+/* reminder styles */
+.left_column{
+    width: 40%;
+    height: 100%;
+    float: left;
+    background: royalblue;
+}
+.right_column{
+    width: 60%;
+    height: 100%;
+    float: left;
+    display: flex;
+    flex-direction: column;
+    background:cyan;
+}      
+.float_container{
+    flex: 1;
+    background-color: white;
+    width: 90%;
+    margin: auto;
+    margin-top: 3%;
+    margin-bottom: 3%;
+}
+.center_container{
+    text-align: center;
+    margin-top: 40%;
+}
