@@ -1,0 +1,175 @@
+<html>
+
+<head>
+  
+
+<script>
+
+function REGISTER()
+	{
+		var accn= document.getElementById("AccountName").value;
+		var eml= document.getElementById("EMail").value;
+		var pwd= document.getElementById("Password").value;			
+		
+        //email id expression code
+		var pwd_expression = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-])/;
+		var letters = /^[A-Za-z]+$/;
+		var filter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+
+		if(accn=='')
+		{
+			alert('Please enter the account name.');
+		}
+		else if(!letters.test(accn))
+		{
+			alert('Account name field required only alphabet characters');
+		}
+		else if(eml=='')
+		{
+			alert('Please enter your user email id');
+		}
+		else if (!filter.test(eml))
+		{
+			alert('Invalid email');
+		}
+		
+		else if(pwd=='')
+		{
+			alert('Please enter Password');
+		}
+		
+		else if(!pwd_expression.test(pwd))
+		{
+			alert ('Upper case, Lower case, Special character and Numeric letter are required in Password filed');
+		}
+		else if(document.getElementById("Password").value.length < 6)
+		{
+			alert ('Password minimum length is 6');
+		}
+		else if(document.getElementById("psw").value.length > 12)
+		{
+			alert ('Password max length is 12');
+		}
+		else
+		{				                            
+               alert('Thank You for Registering');
+		}
+	}
+
+</script>
+
+
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: darkcyan;
+            text-align: center;
+        }
+
+        form {
+            display: inline-block;
+        }
+
+        .content {
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            padding: 10px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        /* Add padding to containers */
+        .container {
+            padding: 16px;
+            background-color: white;
+        }
+
+        /* Full-width input fields */
+        input[type=text],
+        input[type=password] {
+            width: 80%;
+            padding: 15px;
+            margin: 5px 0 22px 0;
+            display: inline-block;
+            border: none;
+            background: #f1f1f1;
+        }
+
+        input[type=text]:focus,
+        input[type=password]:focus {
+            background-color: #ddd;
+            outline: none;
+        }
+
+        /* Overwrite default styles of hr */
+        hr {
+            border: 1px solid #f1f1f1;
+            margin-bottom: 25px;
+        }
+
+        /* Set a style for the submit button */
+        .registerbtn {
+            background-color: #04AA6D;
+            color: white;
+            padding: 16px 20px;
+            margin: 8px 0;
+            border: none;
+            cursor: pointer;
+            width: 70%;
+            opacity: 0.9;
+        }
+
+        .registerbtn:hover {
+            opacity: 1;
+        }
+
+        /* Add a blue text color to links */
+        a {
+            color: dodgerblue;
+        }
+
+        /* Set a grey background color and center the text of the "sign in" section */
+        .signin {
+            background-color: #f1f1f1;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <form name="RegForm" action="/Login.php" onsubmit="return REGISTER()" method="post">
+        <div class="container">
+            <h1>Register</h1>
+            <p>Please fill in this form to create an account.</p>
+            <hr>
+
+            <label for="AccountName"><b>Account Name</b><br></label>
+            <input type="text" placeholder="Account Name" name="AccountName" id="AccountName" required>
+
+
+            <br><label for="EMail"><b>Email</b><br></label>
+            <input type="text" placeholder="Enter Email" name="EMail" id="EMail" required>
+
+            <br><label for="Password"><b>Password</b><br></label>
+            <input type="password" placeholder="Enter Password" name="Password" id="Password" required>
+
+            <hr>
+
+
+            <p>By creating an account you agree to our <a href="#">Terms & Privacy</a>.</p>
+
+            <button type="submit" class="registerbtn">Register</button>
+        </div>
+
+        <div class="container signin">
+            <p>Already have an account? <a href="#">Sign in</a>.</p>
+        </div>
+
+    </form>
+
+</body>
+
+</html>
