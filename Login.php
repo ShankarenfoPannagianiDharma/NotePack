@@ -14,6 +14,6 @@
         header("Location: Main.html");
     }
     else{
-        header("Location: index.html");   
+        header("Location: index.html?message=NotFound");   
     }
 ?>

@@ -1,65 +1,15 @@
+<!DOCTYPE html>
 <html>
 
 <head>
-  
-
-<script>
-
-function REGISTER()
-	{
-		var accn= document.getElementById("AccountName").value;
-		var eml= document.getElementById("EMail").value;
-		var pwd= document.getElementById("Password").value;			
-		
-        //email id expression code
-		var pwd_expression = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-])/;
-		var letters = /^[A-Za-z]+$/;
-		var filter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
-
-		if(accn=='')
-		{
-			alert('Please enter the account name.');
-		}
-		else if(!letters.test(accn))
-		{
-			alert('Account name field required only alphabet characters');
-		}
-		else if(eml=='')
-		{
-			alert('Please enter your user email id');
-		}
-		else if (!filter.test(eml))
-		{
-			alert('Invalid email');
-		}
-		
-		else if(pwd=='')
-		{
-			alert('Please enter Password');
-		}
-		
-		else if(!pwd_expression.test(pwd))
-		{
-			alert ('Upper case, Lower case, Special character and Numeric letter are required in Password filed');
-		}
-		else if(document.getElementById("Password").value.length < 6)
-		{
-			alert ('Password minimum length is 6');
-		}
-		else if(document.getElementById("psw").value.length > 12)
-		{
-			alert ('Password max length is 12');
-		}
-		else
-		{				                            
-               alert('Thank You for Registering');
-		}
-	}
-
-</script>
-
-
     <style>
+        .ERRORMSG{
+            background-color:crimson;
+            color: black;
+            font-weight: bolder;
+            padding: 4px;
+        }
+
         body {
             font-family: Arial, Helvetica, sans-serif;
             background-color: darkcyan;
@@ -140,7 +90,43 @@ function REGISTER()
 </head>
 
 <body>
-    <form name="RegForm" action="/Login.php" onsubmit="return REGISTER()" method="post">
+    <script>
+        //error messages
+        var params = window.location.search.substr(1)
+        var targetParent = document.getElementsByTagName("body")
+        switch(params){
+            case "message=dupl": 
+                targetParent[0].innerHTML += "<p class=\"ERRORMSG\">User with that name already exists.</p>"
+            break;
+            case "message=emptyAccN":
+                targetParent[0].innerHTML += "<p class=\"ERRORMSG\">User name/handle is empty.</p>"
+            break;
+            case "message=AccNOnlyAlph":
+                targetParent[0].innerHTML += "<p class=\"ERRORMSG\">User names must only contain alphabets.</p>"
+            break;
+            case "message=emptyAccM":
+                targetParent[0].innerHTML += "<p class=\"ERRORMSG\">Email field is empty.</p>"
+            break;
+            case "message=accMInv":
+                targetParent[0].innerHTML += "<p class=\"ERRORMSG\">Invalid email address.</p>"
+            break;
+            case "message=emptyPss":
+                targetParent[0].innerHTML += "<p class=\"ERRORMSG\">Password is empty.</p>"
+            break;
+            case "message=PssInv":
+                targetParent[0].innerHTML += "<p class=\"ERRORMSG\">Password must contain at least one uppercase, lowecase, a special character and a number.</p>"
+            break;
+                case "message=PssShrt":
+            targetParent[0].innerHTML += "<p class=\"ERRORMSG\">Password must be longer than 6 characters.</p>"
+            break;
+            case "message=PssLong":
+                targetParent[0].innerHTML += "<p class=\"ERRORMSG\">Password max lenght is 12.</p>"
+            break;
+            default: break;
+        }
+    </script>
+
+    <form name="RegForm" action="Registration.php" method="post">
         <div class="container">
             <h1>Register</h1>
             <p>Please fill in this form to create an account.</p>
@@ -165,7 +151,7 @@ function REGISTER()
         </div>
 
         <div class="container signin">
-            <p>Already have an account? <a href="#">Sign in</a>.</p>
+            <p>Already have an account? <a href="index.html">Sign in</a>.</p>
         </div>
 
     </form>

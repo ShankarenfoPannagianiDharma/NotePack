@@ -8,27 +8,36 @@
         p {text-align: center; min-width: 15%;}
         form {text-align: center; min-width: 15%;}
     </style>
-    <script type="text/javascript" src="Login.js"></script>  
   </head>
   <body>
-      <div id="Main">
-        <h1>Login NotePack</h1>
-        <!-- FACE RECOGNITION METHOD -->
-        <p>
-            <img src="resources/PlaceholderPerson.bmp" alt="placeholder" width="200" height="200">
-        </p>
+    <script>
+    //error messages
+    var params = window.location.search.substr(1)
+    var targetParent = document.getElementsByTagName("body")
 
-        <!-- Standard login method -->
-        <form name="credentials" method="POST" action="Login.php">
-            <input type="text" id="accountName" name="accountName" placeholder="Account Name"><br>
-            <input type="password" id="accountPass" name="accountPass" placeholder="Password"><br>
-            <input type="submit" value="Login" class="loginbtn">
-        </form>
+    if(params == "message=NotFound"){
+      targetParent[0].innerHTML += "<p class=\"ERRORMSG\">User not found.</p>"
+    }
+    </script>
 
-        <!-- Register method -->
-        <p>
-            <button value="Register" onclick="addNewUser">Register</button>
-        </p>
-      </div>
+    <div id="Main">
+      <h1>Login NotePack</h1>
+      <!-- FACE RECOGNITION METHOD -->
+      <p>
+          <img src="resources/PlaceholderPerson.bmp" alt="placeholder" width="200" height="200">
+      </p>
+
+      <!-- Standard login method -->
+      <form name="credentials" method="POST" action="Login.php">
+          <input type="text" id="accountName" name="accountName" placeholder="Account Name"><br>
+          <input type="password" id="accountPass" name="accountPass" placeholder="Password"><br>
+          <input type="submit" value="Login" class="loginbtn">
+      </form>
+
+      <!-- Register method -->
+      <p>
+          <a href="Registration.html"><button value="Register">Register</button></a>
+      </p>
+    </div>
   </body>
 </html>
