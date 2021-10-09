@@ -1,0 +1,19 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="{{ url_for('static',filename='styles/GeneralStyle.css') }}">
+    </head>
+    <body>
+        <table id="notesTable">
+            <tr>
+                <td style="width: 5%;"><button>Save</button></td>
+                <td style="width: 90%;"><input type="text" placeholder="Document Save Location"></td>
+                <td style="width: 5%;"><button>Clear</button></td>
+            </tr>
+            <tr>
+               <td id="notesArea" colspan="3">
+                   <textarea rows="12"></textarea>
+               </td> 
+            </tr>
+        </table>
+    </body>
+</html>

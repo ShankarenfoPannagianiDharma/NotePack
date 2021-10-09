@@ -1,0 +1,43 @@
+<html>
+  <head>
+    <title>NotePack Log In</title>
+      
+    <link rel="stylesheet" href="{{ url_for('static',filename='styles/GeneralStyle.css') }}">
+    <style>
+        h1 {text-align: center; }
+        p {text-align: center; min-width: 15%;}
+        form {text-align: center; min-width: 15%;}
+    </style>
+  </head>
+  <body>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <p class="ERRORMSG">
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+        </p>
+      {% endif %}
+    {% endwith %}
+
+    <div id="Main">
+      <h1>Login NotePack</h1>
+      <!-- FACE RECOGNITION METHOD -->
+      <p>
+          <img src="{{ url_for('static',filename='resources/PlaceholderPerson.bmp') }}" alt="placeholder" width="200" height="200">
+      </p>
+
+      <!-- Standard login method -->
+      <form name="credentials" method="POST" action="/operation_login">
+          <input type="text" id="accountName" name="accountName" placeholder="Account Name"><br>
+          <input type="password" id="accountPass" name="accountPass" placeholder="Password"><br>
+          <input type="submit" value="Login" class="loginbtn">
+      </form>
+
+      <!-- Register method -->
+      <p>
+        <a href="/Registration"><button value="Register">Register</button></a>
+      </p>
+    </div>
+  </body>
+</html>

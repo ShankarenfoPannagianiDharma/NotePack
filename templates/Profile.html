@@ -1,0 +1,16 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="{{ url_for('static',filename='styles/GeneralStyle.css') }}">
+        <style>
+           p {text-align: center; max-width: min-content;}
+        </style>
+    </head>
+    <body onload="loadProfile()">
+        <p>
+            <img src="{{ url_for('static',filename='resources/PlaceholderPerson.bmp') }}" width="200" height="200">
+        </p>
+        <br>
+        <p>Username</p>
+        <p>Email</p>
+    </body>
+</html>

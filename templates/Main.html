@@ -1,0 +1,30 @@
+<html>
+  <head>
+        <title>NotePack</title>
+      
+        <link rel="stylesheet" href="{{ url_for('static',filename='styles/GeneralStyle.css') }}">
+        <script type="text/javascript" src="{{ url_for('static',filename='javascripts/CentralFunctions.js') }}"></script>
+  </head>
+  <body>
+    <!-- Topbar (Navigation bar)-->
+    <table id="topNavBar">
+        <tr>
+            <td><button onclick="switchFrameToProfile()">Profile</button></td>
+            <td><button onclick="switchFrameToList()">Items</button></td>
+            <td><button>Options</button></td>
+            <td><button onclick="switchFrameToChat()">Chat</button></td>
+            <td><button onclick="switchFrameToNotes()">Notes</button></td>
+            <td><button onclick="switchFrameToReminders()">Reminders</button></td>
+            <td><button onclick="gotoZoom()">Zoom</button></td>
+            <td><button onclick="gotoBB()">BlackBoard</button></td>
+            <td><button onclick="gotoTranslink()">U-Pass</button></td>
+            <td><button onclick="gotoMyAccount()">MyAccount</button></td>
+            <td colspan="4"></td>
+            <td><button onclick="logOut()">Log Out</button></td>
+        </tr>
+    </table>
+
+    <iframe src="itemTables" id="OperatingWindow"></iframe>
+
+  </body>
+</html>

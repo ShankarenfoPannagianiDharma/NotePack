@@ -1,0 +1,23 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="{{ url_for('static',filename='styles/GeneralStyle.css') }}">
+    </head>
+    <body>
+        <table id="chatTable">
+            <tr>
+                <td rowspan="2" style="width: 30%; background-color: teal;">groups List</td>
+                <td  style="height: 20px; width: 70%;" >GroupName</td>
+            </tr>
+            <tr>
+                <td style="background-color: steelblue;">Chat Content</td>
+            </tr>
+            <tr>
+                <td><input type="text" placeholder="Find user/group" style="width: 100%;"></td>
+                <td style="height: 20px;">
+                    <input type="text" id="chatToSend" placeholder="Chat message here..." style="width: 89%;">
+                    <button style="width: 10%; ;">Send</button>
+                </td>
+            </tr>
+        </table>
+    </body>
+</html>
