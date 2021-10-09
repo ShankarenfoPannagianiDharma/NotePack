@@ -1,5 +1,4 @@
-from logging import error
-from flask import Flask, request, redirect, flash, render_template
+from flask import Flask, request, redirect, flash, render_template, session
 from flaskext.mysql import MySQL
 
 app = Flask(__name__)
@@ -18,6 +17,7 @@ mysql.init_app(app)
 @app.route("/index")
 @app.route("/")
 def index():
+    session['accountID'] = ""
     return render_template("index.html")
 
 @app.route("/Registration")
@@ -69,6 +69,10 @@ def registeroperation():
     try:
         cursor.execute("INSERT INTO users (Handle, Password, Email) VALUES ('"+accName+"','"+accPass+"','"+accMail+"')")
         conn.commit()
+        cursor.execute("SELECT ID_User FROM users WHERE Handle='"+accName+"' AND Password='"+accPass+"';")
+        data = cursor.fetchone()
+
+        session['accountID'] = data[0]
         return redirect("/Main")
     except Exception as e:
         flash('That name already exists.'+str(e))
@@ -88,6 +92,7 @@ def loginperation():
     data = cursor.fetchone()
 
     if(data is not None):
+        session['accountID'] = data[0]
         return redirect("/Main")
     else:
         flash('User not found')
