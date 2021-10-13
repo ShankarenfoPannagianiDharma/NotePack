@@ -96,6 +96,11 @@ iframe{
     height: 90%;
 }
 
+.TinyForm{
+    display: inline;
+    float: right;
+}
+
 /* item listing styles */
 #itemTable{
     margin-top: 5px;

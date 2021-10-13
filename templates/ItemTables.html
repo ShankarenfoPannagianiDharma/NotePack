@@ -4,51 +4,27 @@
     </head>
     <body onload="SetUser()">
         <!-- button for manual upload -->
-        <input type="button" value="Manual Upload" onclick="upload_manual();"/>
+        <form method="POST" action="/POSTUploadFile" enctype="multipart/form-data">
+            <input type="file" name="file" multiple>
+            <input type="submit" value="Submit">
+          </form>
         <!-- Main table- dynamic array of stored documents -->
         <table id="itemTable" ondrop="DragDropUpload(e)" ondragover="return false">
-            <tr>
-                <td>Filename</td>
-            </tr>
-            <tr>
-                <td>Filename</td>
-            </tr>
-            <tr>
-                <td>Filename</td>
-            </tr>
-            <tr>
-                <td>Filename</td>
-            </tr>
-            <tr>
-                <td>Filename</td>
-            </tr>
-            <tr>
-                <td>Filename</td>
-            </tr><tr>
-                <td>Filename</td>
-            </tr>
-            <tr>
-                <td>Filename</td>
-            </tr>
-            <tr>
-                <td>Filename</td>
-            </tr><tr>
-                <td>Filename</td>
-            </tr>
-            <tr>
-                <td>Filename</td>
-            </tr>
-            <tr>
-                <td>Filename</td>
-            </tr><tr>
-                <td>Filename</td>
-            </tr>
-            <tr>
-                <td>Filename</td>
-            </tr>
-            <tr>
-                <td>Filename</td>
-            </tr>
+            {% for file in files %}
+                <tr>
+                    <td>
+                        {{ file }}
+                        <form class="TinyForm" action="/DelFile" method="post">
+                            <input type="hidden" name="targetFile" value={{ file }}>
+                            <input type="submit" name="Delete" value="Delete" />
+                        </form>
+                        <form class="TinyForm" action="/DowFile" method="post">
+                            <input type="hidden" name="targetFile" value={{ file }}>
+                            <input type="submit" name="Download" value="Download" />
+                        </form>                                                
+                    </td>
+                </tr>
+            {% endfor %}
         </table>
     </body>
 </html>

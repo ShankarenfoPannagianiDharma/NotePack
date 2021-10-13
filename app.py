@@ -1,4 +1,5 @@
-from flask import Flask, request, redirect, flash, render_template, session
+import os
+from flask import Flask, request, redirect, flash, render_template, session, send_file
 from flaskext.mysql import MySQL
 
 app = Flask(__name__)
@@ -103,7 +104,10 @@ def mainView():
     return render_template("Main.html")
 @app.route('/ItemTables')
 def ItemTables():
-    return render_template('ItemTables.html')
+    #get list of items in file repository
+    chckDir(session['accountID'])
+    userFiles = os.listdir("UserRepos/"+str(session['accountID'])+"/Files")
+    return render_template('ItemTables.html', files=userFiles)
 @app.route('/Chat')
 def Chat():
     return render_template('Chat.html')
@@ -127,3 +131,22 @@ def Reminders():
     return render_template('Reminders.html')
 
     
+@app.route('/POSTUploadFile', methods=["POST"])
+def POSTFile():
+
+    #Check and make directory if repo does/does not exists
+    chckDir(session['accountID'])
+    for file in request.files.getlist('file'):
+        if file.filename != '':
+            #also replace whitespaces with '_', file pathing has trouble with whitespace
+            file.save("UserRepos/"+str(session['accountID'])+"/Files/"+file.filename.replace(" ","_"))
+    
+    return redirect('/ItemTables')
+@app.route("/DowFile", methods=["POST"])
+def dowFile():
+    return send_file("UserRepos\\"+str(session['accountID'])+"\\Files\\"+request.form['targetFile'])
+
+#method to make directory of user id(int) if does not exist.
+def chckDir(id):
+    if not os.path.exists("UserRepos/"+str(id)+"/Files/"):
+        os.makedirs("UserRepos/"+str(id)+"/Files/")
