@@ -112,7 +112,16 @@ def Notes():
     return render_template('Notes.html')
 @app.route('/Profile')
 def Profile():
-    return render_template('Profile.html')
+    if(session['accountID'] is None or session['accountID'] == ''):
+        return redirect('/')
+
+    #connect to db, get user details
+    conn = mysql.connect()
+    cursor =conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE ID_User="+str(session['accountID'])+";")
+    data = cursor.fetchone()
+
+    return render_template('Profile.html', userData=data)
 @app.route('/Reminders')
 def Reminders():
     return render_template('Reminders.html')
