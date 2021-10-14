@@ -140,11 +140,16 @@ def POSTFile():
         if file.filename != '':
             #also replace whitespaces with '_', file pathing has trouble with whitespace
             file.save("UserRepos/"+str(session['accountID'])+"/Files/"+file.filename.replace(" ","_"))
-    
     return redirect('/ItemTables')
+
 @app.route("/DowFile", methods=["POST"])
 def dowFile():
     return send_file("UserRepos\\"+str(session['accountID'])+"\\Files\\"+request.form['targetFile'])
+
+@app.route("/DelFile",methods=["POST"])
+def delFile():
+    os.remove("UserRepos\\"+str(session['accountID'])+"\\Files\\"+request.form['targetFile'])
+    return redirect('/ItemTables')
 
 #method to make directory of user id(int) if does not exist.
 def chckDir(id):
