@@ -1,10 +1,10 @@
-<html>
+<html class="droparea">
     <head>
         <link rel="stylesheet" href="{{ url_for('static',filename='styles/GeneralStyle.css') }}">
         <link rel="stylesheet" href="{{ url_for('static',filename='styles/ItemTablesStyle.css') }}">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>   <!-- REQ for drag/drop -->
     </head>
-    <body onload="SetUser()">
+    <body>
         <!-- button for manual upload -->
         <form id="tightForm" method="POST" action="/POSTUploadFile" enctype="multipart/form-data">
             <input type="file" name="file" multiple>
@@ -25,15 +25,13 @@
         <table id="itemTable">
             {% for fldr in foldrs %}
                 <tr>
-                    <a href="/ItemTables?targetFolder="+{{fldr}}>
                     <td style="background-color: darkgoldenrod;">
-                        {{ fldr }}
+                        <a href="/ItemTables?targetFolder="+{{fldr}}>{{ fldr }}</a>
                         <form class="TinyForm" action="/DelFolder" method="post">
                             <input type="hidden" name="targetFile" value={{ fldr }}>
                             <input type="submit" name="Delete" value="Delete" />
                         </form>            
                     </td>
-                    </a>
                 </tr>
             {% endfor %}
             {% for file in files %}
