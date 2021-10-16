@@ -133,18 +133,23 @@ def Reminders():
     
 @app.route('/POSTUploadFile', methods=["POST"])
 def POSTFile():
-
     #Check and make directory if repo does/does not exists
     chckDir(session['accountID'])
+    print("POSTIN UPLOAD FIEL")
     for file in request.files.getlist('file'):
         if file.filename != '':
             #also replace whitespaces with '_', file pathing has trouble with whitespace
             file.save("UserRepos/"+str(session['accountID'])+"/Files/"+file.filename.replace(" ","_"))
-    
     return redirect('/ItemTables')
+
 @app.route("/DowFile", methods=["POST"])
 def dowFile():
-    return send_file("UserRepos\\"+str(session['accountID'])+"\\Files\\"+request.form['targetFile'])
+    return send_file("UserRepos\\"+str(session['accountID'])+"\\Files\\"+request.form['targetFile'],as_attachment=True)
+
+@app.route("/DelFile",methods=["POST"])
+def delFile():
+    os.remove("UserRepos\\"+str(session['accountID'])+"\\Files\\"+request.form['targetFile'])
+    return redirect('/ItemTables')
 
 #method to make directory of user id(int) if does not exist.
 def chckDir(id):

@@ -1,30 +1,79 @@
-<html>
+<html class="droparea">
     <head>
         <link rel="stylesheet" href="{{ url_for('static',filename='styles/GeneralStyle.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static',filename='styles/ItemTablesStyle.css') }}">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     </head>
-    <body onload="SetUser()">
+    <body>
         <!-- button for manual upload -->
         <form method="POST" action="/POSTUploadFile" enctype="multipart/form-data">
             <input type="file" name="file" multiple>
             <input type="submit" value="Submit">
           </form>
+
         <!-- Main table- dynamic array of stored documents -->
-        <table id="itemTable" ondrop="DragDropUpload(e)" ondragover="return false">
-            {% for file in files %}
-                <tr>
-                    <td>
-                        {{ file }}
-                        <form class="TinyForm" action="/DelFile" method="post">
-                            <input type="hidden" name="targetFile" value={{ file }}>
-                            <input type="submit" name="Delete" value="Delete" />
-                        </form>
-                        <form class="TinyForm" action="/DowFile" method="post">
-                            <input type="hidden" name="targetFile" value={{ file }}>
-                            <input type="submit" name="Download" value="Download" />
-                        </form>                                                
-                    </td>
-                </tr>
-            {% endfor %}
+        <table id="itemTable">
+            <!-- {% if files == None %} -->
+            <!-- {% else %} -->
+                 {% for file in files %}
+                    <tr>
+                        <td>
+                            {{file}}
+                            <form class="TinyForm" action="/DelFile" method="post">
+                                <input type="hidden" name="targetFile" value={{ file }}>
+                                <input type="submit" name="Delete" value="Delete" />
+                            </form>
+                            <form class="TinyForm" action="/DowFile" method="post">
+                                <input type="hidden" name="targetFile" value={{ file }}>
+                                <input type="submit" name="Download" value="Download" />
+                            </form>                                                
+                        </td>
+                    </tr>
+                {% endfor %}
+            <!-- {% endif %} -->
         </table>
+
+        <script>
+            $(function(){
+                //when file upload success refresh
+                var fileUploadSuccess = function(data){
+                    location.reload(); 
+                };
+
+                //When file upload fails do nothing
+                var fileUploadFail = function(data){};
+
+                //disable native behavior on dragging over (to allow dropping)
+                var dragHandler = function(ev) {
+                    ev.preventDefault();
+                }
+
+                //method called when item is dropped
+                var dropHandler = function(ev) {
+                    ev.preventDefault();
+                    //get dropped files from event
+                    var files = ev.originalEvent.dataTransfer.files;
+                    //Programmatically make a POST form
+                    var formData = new FormData();
+                    formData.append("file", files[0]);
+
+                    var req = {
+                        url: "/POSTUploadFile",
+                        method: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: formData
+                    };
+                    var promise = $.ajax(req);
+                    promise.then(fileUploadSuccess, fileUploadFail);
+                }
+                var dropHandlerSet = {
+                    dragover: dragHandler,
+                    drop: dropHandler
+                };
+                $(".droparea").on(dropHandlerSet)
+            });
+        </script>
+
     </body>
 </html>
