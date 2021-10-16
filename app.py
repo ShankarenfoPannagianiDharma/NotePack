@@ -101,7 +101,10 @@ def loginperation():
 
 @app.route("/Main")
 def mainView():
-    return render_template("Main.html")
+    if session['accountID'] == None:
+        return redirect("/index")
+    else:
+        return render_template("Main.html")
 
 @app.route('/ItemTables')
 def ItemTables():
@@ -114,10 +117,10 @@ def ItemTables():
 
     # separate directories and files
     for entry in os.scandir(targetPath):
-        if entry.isdir():
-            foldrList.append(entry)
+        if entry.is_dir():
+            foldrList.append(entry.name)
         else:
-            filesList.append(entry)
+            filesList.append(entry.name)
 
     return render_template('ItemTables.html', files=filesList, foldrs=foldrList)
 

@@ -25,13 +25,15 @@
         <table id="itemTable">
             {% for fldr in foldrs %}
                 <tr>
-                    <td>
+                    <a href="/ItemTables?targetFolder="+{{fldr}}>
+                    <td style="background-color: darkgoldenrod;">
                         {{ fldr }}
                         <form class="TinyForm" action="/DelFolder" method="post">
                             <input type="hidden" name="targetFile" value={{ fldr }}>
                             <input type="submit" name="Delete" value="Delete" />
                         </form>            
                     </td>
+                    </a>
                 </tr>
             {% endfor %}
             {% for file in files %}
