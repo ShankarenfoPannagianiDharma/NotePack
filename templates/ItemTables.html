@@ -9,7 +9,7 @@
             <input type="submit" value="Submit">
           </form>
         <!-- Main table- dynamic array of stored documents -->
-        <table id="itemTable" ondrop="DragDropUpload(e)" ondragover="return false">
+        <table id="itemTable">
             {% for file in files %}
                 <tr>
                     <td>

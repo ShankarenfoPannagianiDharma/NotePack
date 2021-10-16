@@ -144,7 +144,7 @@ def POSTFile():
 
 @app.route("/DowFile", methods=["POST"])
 def dowFile():
-    return send_file("UserRepos\\"+str(session['accountID'])+"\\Files\\"+request.form['targetFile'])
+    return send_file("UserRepos\\"+str(session['accountID'])+"\\Files\\"+request.form['targetFile'],as_attachment=True)
 
 @app.route("/DelFile",methods=["POST"])
 def delFile():
