@@ -1,15 +1,39 @@
 <html>
     <head>
         <link rel="stylesheet" href="{{ url_for('static',filename='styles/GeneralStyle.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static',filename='styles/ItemTablesStyle.css') }}">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>   <!-- REQ for drag/drop -->
     </head>
     <body onload="SetUser()">
         <!-- button for manual upload -->
-        <form method="POST" action="/POSTUploadFile" enctype="multipart/form-data">
+        <form id="tightForm" method="POST" action="/POSTUploadFile" enctype="multipart/form-data">
             <input type="file" name="file" multiple>
             <input type="submit" value="Submit">
-          </form>
-        <!-- Main table- dynamic array of stored documents -->
+        </form>
+        <button class="newFolderButton" onclick="openForm()">New Folder</button>
+        <div class="popupForm" id="createFolderForm">
+            <form action="/newFolder" class="form-container" method="POST"> 
+                <label for="email"><b>Folder Name: </b></label>
+                <input type="text" name="newFName" required>
+                <br>
+                <button type="submit">Create Folder</button>
+                <button type="button" class="btnCancel" onclick="closeForm()">Close</button>
+            </form>
+          </div> 
+
+        <!-- Main table- dynamic array of stored folders & documents -->
         <table id="itemTable">
+            {% for fldr in foldrs %}
+                <tr>
+                    <td>
+                        {{ fldr }}
+                        <form class="TinyForm" action="/DelFolder" method="post">
+                            <input type="hidden" name="targetFile" value={{ fldr }}>
+                            <input type="submit" name="Delete" value="Delete" />
+                        </form>            
+                    </td>
+                </tr>
+            {% endfor %}
             {% for file in files %}
                 <tr>
                     <td>
@@ -26,5 +50,53 @@
                 </tr>
             {% endfor %}
         </table>
+
+        <script>
+            $(function(){
+                //when file upload success refresh
+                var fileUploadSuccess = function(data){
+                    location.reload(); 
+                };
+
+                //When file upload fails do nothing
+                var fileUploadFail = function(data){};
+
+                //disable native behavior on dragging over (to allow dropping)
+                var dragHandler = function(ev) {
+                    ev.preventDefault();
+                }
+
+                //method called when item is dropped
+                var dropHandler = function(ev) {
+                    ev.preventDefault();
+                    //get dropped files from event
+                    var files = ev.originalEvent.dataTransfer.files;
+                    //Programmatically make a POST form
+                    var formData = new FormData();
+                    formData.append("file", files[0]);
+
+                    var req = {
+                        url: "/POSTUploadFile",
+                        method: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: formData
+                    };
+                    var promise = $.ajax(req);
+                    promise.then(fileUploadSuccess, fileUploadFail);
+                }
+                var dropHandlerSet = {
+                    dragover: dragHandler,
+                    drop: dropHandler
+                };
+                $(".droparea").on(dropHandlerSet)
+            });
+
+            //button functions to open/close popup forms
+            function openForm() 
+            {document.getElementById("createFolderForm").style.display = "block";}
+            function closeForm() 
+            {document.getElementById("createFolderForm").style.display = "none";}
+        </script>
     </body>
 </html>

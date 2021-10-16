@@ -102,12 +102,25 @@ def loginperation():
 @app.route("/Main")
 def mainView():
     return render_template("Main.html")
+
 @app.route('/ItemTables')
 def ItemTables():
     #get list of items in file repository
     chckDir(session['accountID'])
-    userFiles = os.listdir("UserRepos/"+str(session['accountID'])+"/Files")
-    return render_template('ItemTables.html', files=userFiles)
+    targetPath = "UserRepos/"+str(session['accountID'])+"/Files"
+    filesList = list()
+    foldrList = list()
+    # userFiles = os.listdir("UserRepos/"+str(session['accountID'])+"/Files")
+
+    # separate directories and files
+    for entry in os.scandir(targetPath):
+        if entry.isdir():
+            foldrList.append(entry)
+        else:
+            filesList.append(entry)
+
+    return render_template('ItemTables.html', files=filesList, foldrs=foldrList)
+
 @app.route('/Chat')
 def Chat():
     return render_template('Chat.html')
@@ -149,6 +162,13 @@ def dowFile():
 @app.route("/DelFile",methods=["POST"])
 def delFile():
     os.remove("UserRepos\\"+str(session['accountID'])+"\\Files\\"+request.form['targetFile'])
+    return redirect('/ItemTables')
+
+@app.route("/newFolder", methods=["POST"])
+def createFolder():
+    folderName = request.form['newFName']
+    if not os.path.exists("UserRepos/"+str(session['accountID'])+"/Files/"+folderName):
+        os.makedirs("UserRepos/"+str(session['accountID'])+"/Files/"+folderName)
     return redirect('/ItemTables')
 
 #method to make directory of user id(int) if does not exist.
