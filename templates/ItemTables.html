@@ -6,13 +6,13 @@
     </head>
     <body>
         <!-- button for manual upload -->
-        <form id="tightForm" method="POST" action="/POSTUploadFile" enctype="multipart/form-data">
-            <input type="file" name="file" multiple>
+        <form id="tightForm" action="/POSTUploadFile" method="POST" enctype="multipart/form-data">
+            <input type="file" name="file" id="file" multiple>
             <input type="submit" value="Submit">
         </form>
         <button class="newFolderButton" onclick="openForm()">New Folder</button>
         <div class="popupForm" id="createFolderForm">
-            <form action="/newFolder" class="form-container" method="POST"> 
+            <form id="CreateNewFolder" action="/newFolder" class="form-container" method="POST"> 
                 <label for="email"><b>Folder Name: </b></label>
                 <input type="text" name="newFName" required>
                 <br>
@@ -23,32 +23,41 @@
 
         <!-- Main table- dynamic array of stored folders & documents -->
         <table id="itemTable">
-            {% for fldr in foldrs %}
-                <tr>
-                    <td style="background-color: darkgoldenrod;">
-                        <a href="/ItemTables?targetFolder="+{{fldr}}>{{ fldr }}</a>
-                        <form class="TinyForm" action="/DelFolder" method="post">
-                            <input type="hidden" name="targetFile" value={{ fldr }}>
-                            <input type="submit" name="Delete" value="Delete" />
-                        </form>            
-                    </td>
-                </tr>
-            {% endfor %}
-            {% for file in files %}
-                <tr>
-                    <td>
-                        {{ file }}
-                        <form class="TinyForm" action="/DelFile" method="post">
-                            <input type="hidden" name="targetFile" value={{ file }}>
-                            <input type="submit" name="Delete" value="Delete" />
-                        </form>
-                        <form class="TinyForm" action="/DowFile" method="post">
-                            <input type="hidden" name="targetFile" value={{ file }}>
-                            <input type="submit" name="Download" value="Download" />
-                        </form>                                                
-                    </td>
-                </tr>
-            {% endfor %}
+            <!-- if not root folder (param targetFolder NOT == "") display ... (back) folder -->
+            {% if isRoot == false %}
+            <tr>
+                <td style="background-color: yellow;">
+                    <a id="goDir" href="/moveCD" movement="...">...</a>
+                </td>
+            </tr>
+            {% endif %}
+                <!-- Display contents of path -->
+                {% for fldr in foldrs %}
+                    <tr>
+                        <td style="background-color: darkgoldenrod;">
+                            <a id="goDir" href="/moveCD" movement="{{ fldr }}">{{ fldr }}</a>
+                            <form id="deleteTargetFolder" class="TinyForm" action="/DelFolder" method="post">
+                                <input type="hidden" name="targetFile" value={{ fldr }}>
+                                <input type="submit" name="Delete" value="Delete" />
+                            </form>            
+                        </td>
+                    </tr>
+                {% endfor %}
+                {% for file in files %}
+                    <tr>
+                        <td>
+                            {{ file }}
+                            <form class="TinyForm" action="/DelFile" id="DeleteTargetFile" method="post">
+                                <input type="hidden" name="targetFile" value={{ file }}>
+                                <input type="submit" name="Delete" value="Delete" />
+                            </form>
+                            <form class="TinyForm" action="/DowFile" method="post">
+                                <input type="hidden" name="targetFile" value={{ file }}>
+                                <input type="submit" name="Download" value="Download" />
+                            </form>                                                
+                        </td>
+                    </tr>
+                {% endfor %}
         </table>
 
         <script>
@@ -90,6 +99,74 @@
                     drop: dropHandler
                 };
                 $(".droparea").on(dropHandlerSet)
+            });
+            
+            //form submit of Manual Upload
+            $("#tightForm").submit(function(e) {
+                e.preventDefault();
+                
+                var files = $("#file").get(0).files;
+                var fileData = new FormData();
+    
+                for (var i = 0; i < files.length; i++){
+                    fileData.append("file", files[i]);
+                }
+                
+                $.ajax({
+                    type: "POST",
+                    url: "/POSTUploadFile",
+                    data: fileData,
+                    contentType: false,
+                    processData: false,
+                    success: function(){location.reload();}
+                });
+            });
+            //form submit of Create new Folder
+            $("#CreateNewFolder").submit(function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var url = form.attr('action');
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: form.serialize(),
+                    success: function(){location.reload();}
+                    });
+            });
+            //form submit of Delete folder
+            $("#deleteTargetFolder").submit(function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var url = form.attr('action');
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: form.serialize(),
+                    success: function(){location.reload();}
+                    });
+            })
+            //form submit of Delete File
+            $("#DeleteTargetFile").submit(function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var url = form.attr('action');
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: form.serialize(),
+                    success: function(data){location.reload();}
+                    });
+            });
+
+            //HREF links to move directories up/down
+            $("a#goDir").click(function(e){
+                e.preventDefault();
+                $.ajax({
+                    type: "POST",
+                    url: "/moveCD",
+                    data: {movement:$(this).attr("movement")},
+                    success: function(data){location.reload();}
+                    });
             });
 
             //button functions to open/close popup forms
