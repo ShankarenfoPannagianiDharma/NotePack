@@ -1,4 +1,4 @@
-import os
+import os, shutil
 from flask import Flask, request, redirect, flash, render_template, session, send_file
 from flaskext.mysql import MySQL
 
@@ -101,13 +101,37 @@ def loginperation():
 
 @app.route("/Main")
 def mainView():
-    return render_template("Main.html")
+    if session['accountID'] == None:
+        return redirect("/index")
+    else:
+        return render_template("Main.html")
+#this is a pit-stop to reset session CD->redirects to ItemTablesList
 @app.route('/ItemTables')
 def ItemTables():
-    #get list of items in file repository
     chckDir(session['accountID'])
-    userFiles = os.listdir("UserRepos/"+str(session['accountID'])+"/Files")
-    return render_template('ItemTables.html', files=userFiles)
+    session['currentDirectory'] = "UserRepos/"+str(session['accountID'])+"/Files"
+    return redirect("/ItemTablesList")
+
+#actual list of items in (session directory)
+@app.route('/ItemTablesList')
+def ItemTablesList():
+    #get list of items in file repository
+    isRoot = True
+    if(session['currentDirectory'] != "UserRepos/"+str(session['accountID'])+"/Files"):
+        isRoot = False
+
+    filesList = list()
+    foldrList = list()
+    # separate directories and files
+    for entry in os.scandir(session['currentDirectory']):
+        if entry.is_dir():
+            foldrList.append(entry.name)
+        else:
+            filesList.append(entry.name)
+
+    #serve template with params:list of files, list of folders, boolean if it is root
+    return render_template('ItemTables.html', files=filesList, foldrs=foldrList, isRoot=isRoot)
+
 @app.route('/Chat')
 def Chat():
     return render_template('Chat.html')
@@ -133,23 +157,52 @@ def Reminders():
     
 @app.route('/POSTUploadFile', methods=["POST"])
 def POSTFile():
-
     #Check and make directory if repo does/does not exists
     chckDir(session['accountID'])
     for file in request.files.getlist('file'):
         if file.filename != '':
             #also replace whitespaces with '_', file pathing has trouble with whitespace
-            file.save("UserRepos/"+str(session['accountID'])+"/Files/"+file.filename.replace(" ","_"))
-    return redirect('/ItemTables')
+            file.save(session['currentDirectory']+"/"+file.filename.replace(" ","_"))
+        else:
+            print("NO FILE!")
+    return ('', 204)
 
 @app.route("/DowFile", methods=["POST"])
 def dowFile():
-    return send_file("UserRepos\\"+str(session['accountID'])+"\\Files\\"+request.form['targetFile'],as_attachment=True)
+    return send_file(session['currentDirectory']+"/"+request.form['targetFile'],as_attachment=True)
 
 @app.route("/DelFile",methods=["POST"])
 def delFile():
-    os.remove("UserRepos\\"+str(session['accountID'])+"\\Files\\"+request.form['targetFile'])
-    return redirect('/ItemTables')
+    os.remove(session['currentDirectory']+"/"+request.form['targetFile'])
+    return ('', 204)
+
+@app.route("/newFolder", methods=["POST"])
+def createFolder():
+    folderName = request.form['newFName']
+    if not os.path.exists(session['currentDirectory']+"/"+folderName):
+        os.makedirs(session['currentDirectory']+"/"+folderName)
+    return ('', 204)
+
+@app.route("/moveCD", methods=["POST"])
+def redirectCD():
+    nextDir = request.form['movement']
+    if(nextDir == "..."):
+        session['currentDirectory'] = os.path.dirname(session['currentDirectory'])
+    else:
+        session['currentDirectory'] += "/"+nextDir
+    return ('', 204)
+
+@app.route("/DelFolder", methods=["POST"])
+def deleteFolder():
+    targetDir = session['currentDirectory'] + "/"+request.form['targetFolder']
+    if len(os.listdir(targetDir)) == 0:
+        print("Directory is empty")
+        os.rmdir(targetDir)
+    else:    
+        print("Directory is not empty")
+        shutil.rmtree(targetDir)
+    
+    return ('', 204)
 
 #method to make directory of user id(int) if does not exist.
 def chckDir(id):
