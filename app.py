@@ -1,4 +1,4 @@
-import os
+import os, shutil
 from flask import Flask, request, redirect, flash, render_template, session, send_file
 from flaskext.mysql import MySQL
 
@@ -173,7 +173,7 @@ def dowFile():
 
 @app.route("/DelFile",methods=["POST"])
 def delFile():
-    os.remove("UserRepos\\"+str(session['accountID'])+"\\Files\\"+request.form['targetFile'])
+    os.remove(session['currentDirectory']+"/"+request.form['targetFile'])
     return ('', 204)
 
 @app.route("/newFolder", methods=["POST"])
@@ -190,6 +190,18 @@ def redirectCD():
         session['currentDirectory'] = os.path.dirname(session['currentDirectory'])
     else:
         session['currentDirectory'] += "/"+nextDir
+    return ('', 204)
+
+@app.route("/DelFolder", methods=["POST"])
+def deleteFolder():
+    targetDir = session['currentDirectory'] + "/"+request.form['targetFolder']
+    if len(os.listdir(targetDir)) == 0:
+        print("Directory is empty")
+        os.rmdir(targetDir)
+    else:    
+        print("Directory is not empty")
+        shutil.rmtree(targetDir)
+    
     return ('', 204)
 
 #method to make directory of user id(int) if does not exist.
