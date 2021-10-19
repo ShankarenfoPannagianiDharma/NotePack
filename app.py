@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
 mysql = MySQL()
 app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = '1234'
+app.config['MYSQL_DATABASE_PASSWORD'] = ''
 app.config['MYSQL_DATABASE_DB'] = 'notespack_db'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 mysql.init_app(app)
@@ -45,10 +45,6 @@ def registeroperation():
     #VALIDATION
     #REGEX Validation needs reworking to fit python
     emailValidation = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-    pwd_expression = "/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-])/"
-    letters = "/^[A-Za-z]+$/"
-    filter = "/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/"
-
     
     if(accName==''):
         flash('Please enter your account\'s name\/handle.')
@@ -72,9 +68,10 @@ def registeroperation():
     # else if(!preg_match($pwd_expression,$accPass)){
     #     header("Location: Registration.html?message=PssInv");
     # }
-    elif(accImageB64=='' or accImageB64 == None):
-        flash('Please upload an image.')
-        return redirect("/Registration")
+    # User can opt to NOT take image.
+    # elif(accImageB64=='' or accImageB64 == None):
+    #     flash('Please upload an image.')
+    #     return redirect("/Registration")
     elif(len(accPass) < 6):
         flash('Password should be more than 6 characters.')
         return redirect("/Registration")
@@ -82,23 +79,26 @@ def registeroperation():
         flash('Password should be less than 12 characters.')
         return redirect("/Registration")
     
-     #Generate image name
-    accImage = accName.replace(" ","_").replace(".","_")+"_user_image"
-
-    #Save image
-    convert_and_save(accImageB64,accImage);
-    
     #connect to db
     conn = mysql.connect()
     cursor =conn.cursor()
 
     try:
-        cursor.execute("INSERT INTO users (Handle, Password, Email, Image) VALUES ('"+accName+"','"+accPass+"','"+accMail+"','"+accImage+".jpg')")
+        cursor.execute("INSERT INTO users (Handle, Password, Email, Image) VALUES ('"+accName+"','"+accPass+"','"+accMail+"')")
         conn.commit()
         cursor.execute("SELECT ID_User FROM users WHERE Handle='"+accName+"' AND Password='"+accPass+"';")
         data = cursor.fetchone()
 
         session['accountID'] = data[0]
+
+        #now save image (if given)
+        if(accImageB64 != None or accImageB64!=''):
+            #Generate image name
+            accImage = accName.replace(" ","_").replace(".","_")+"_user_image"
+            #Save image
+            convert_and_save(accImageB64,accImage)
+            #TODO: STORE IMAGE SOMEWHERE
+
         return redirect("/Main")
     except Exception as e:
         flash('That name already exists.'+str(e))
@@ -106,7 +106,7 @@ def registeroperation():
 
 
 @app.route("/operation_login", methods=["POST"])
-def loginperation():
+def loginOperation():
     accName = request.form['accountName']  
     accPass = request.form['accountPass'] 
     accImageB64 = request.form['ImageB64']  
@@ -130,13 +130,13 @@ def loginperation():
     data = cursor.fetchone()
 
     if(data is not None):
-        convert_and_save(accImageB64,accName+"_attempt_login")
-        if compare(accName+"_attempt_login.jpg", data[4]):
+        #convert_and_save(accImageB64,accName+"_attempt_login")
+        #if compare(accName+"_attempt_login.jpg", data[4]):
             session['accountID'] = data[0]
             return redirect("/Main")
-        else:
-            flash('User not recognized')
-            return redirect('/')
+        #else:
+            #flash('User not recognized')
+            #return redirect('/')
     else:
         flash('User not found')
         return redirect('/')
@@ -237,7 +237,9 @@ def redirectCD():
 
 @app.route("/DelFolder", methods=["POST"])
 def deleteFolder():
+    print(session['currentDirectory'])
     targetDir = session['currentDirectory'] + "/"+request.form['targetFolder']
+    print(targetDir)
     if len(os.listdir(targetDir)) == 0:
         print("Directory is empty")
         os.rmdir(targetDir)
@@ -256,14 +258,8 @@ def chckDir(id):
 ####
 import base64 
 import boto3
-import botocore
-from PIL import *
-import io
-import PIL.Image as Image
 import creds
-from botocore.exceptions import ClientError, PaginationError
-from boto3.dynamodb.conditions import Key, Attr
-from datetime import datetime   
+from botocore.exceptions import ClientError
 from flask import session, url_for
 
 @app.route("/uploadImage", methods=["POST"])

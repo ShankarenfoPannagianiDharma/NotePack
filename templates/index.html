@@ -28,7 +28,7 @@
         <tr>
           <td style="width: 50%;text-align: center;vertical-align: middle;">
             <h5>Login with face recognition</h5>
-            <input type="username" id="accountName" name="accountName" placeholder="Account Name"><br>
+            <!-- <input type="username" id="accountName" name="accountName" placeholder="Account Name"><br> -->
             <input id="ImageB64" name="ImageB64" type="hidden">
 
             <div id="foto">
@@ -48,15 +48,16 @@
           </td>
           <td style="width: 50%;text-align: center;vertical-align: middle;">
             <h5>Login with password</h5>
-            <input type="username" placeholder="Account name" name="accountNamet" id="accountNamet" style="width: 80%;
-            padding: 15px;
-            margin: 5px 0 22px 0;
-            display: inline-block;
-            border: none;
-            background: lightgray;">
-            <input type="password" id="accountPass" value="" name="accountPass" placeholder="Password"><br>
-            <input value="Login" class="loginbtn" onclick="login2()"  style="width: 30%;text-align: center;vertical-align: middle;" />
-
+            <form method="POST" action="/operation_login">
+              <input type="username" placeholder="Account name" name="accountName" id="accountName" style="width: 80%;
+              padding: 15px;
+              margin: 5px 0 22px 0;
+              display: inline-block;
+              border: none;
+              background: lightgray;">
+              <input type="password" id="accountPass" value="" name="accountPass" placeholder="Password"><br>
+              <input type="submit" value="Login" class="loginbtn" style="width: 30%;text-align: center;vertical-align: middle;" />
+            </form>
           </td>
         </tr>
       </table> 
@@ -68,12 +69,7 @@
       </p>
     </div>
     
-     <script>
-    function login2(){
-      document.getElementById("accountName").value = document.getElementById("accountNamet").value;
-      document.forms["credentials"].submit()
-    }
-
+    <script>
     'use strict';
 
     const video = document.getElementById('video');

@@ -37,7 +37,7 @@
                         <td style="background-color: darkgoldenrod;">
                             <a id="goDir" href="/moveCD" movement="{{ fldr }}">{{ fldr }}</a>
                             <form id="deleteTargetFolder" class="TinyForm" action="/DelFolder" method="post">
-                                <input type="hidden" name="targetFile" value={{ fldr }}>
+                                <input type="hidden" name="targetFolder" value={{ fldr }}>
                                 <input type="submit" name="Delete" value="Delete" />
                             </form>            
                         </td>
