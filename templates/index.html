@@ -23,52 +23,55 @@
     <div id="Main" style="width: 75%;">
       <h1>Login to NotePack</h1>
       <form name="credentials" method="POST" action="/operation_login">
-          
-         <table style="width: 100%;">
-        <tr>
-          <td style="width: 50%;text-align: center;vertical-align: middle;">
-            <h5>Login with face recognition</h5>
-            <!-- <input type="username" id="accountName" name="accountName" placeholder="Account Name"><br> -->
-            <input id="ImageB64" name="ImageB64" type="hidden">
-
-            <div id="foto">
-              <div class="video-wrap">
-                <video id="video" playsinline autoplay width="500" height="250"></video>
-              </div>
-              <input value="Login" class="loginbtn" id="snap" style="width: 30%;text-align: center;vertical-align: middle;" />
-
-              <!-- Webcam video snapshot -->
-              <canvas id="canvas" style="display: none;"></canvas>
-
-            </div>
-           
-            <center>
-              <div id="capturado" style="width: 80%;"></div>
-            </center>
-          </td>
-          <td style="width: 50%;text-align: center;vertical-align: middle;">
-            <h5>Login with password</h5>
-            <form method="POST" action="/operation_login">
-              <input type="username" placeholder="Account name" name="accountName" id="accountName" style="width: 80%;
+        <table style="width: 100%;">
+          <tr>
+            <td colspan="2" style="text-align: center;">
+              <input type="username" placeholder="Account name" name="accountName" id="accountName" style="
               padding: 15px;
-              margin: 5px 0 22px 0;
-              display: inline-block;
-              border: none;
+              margin: auto;
+              width: 40%;
               background: lightgray;">
+            </td>
+          </tr>
+          <tr>
+            <td style="width: 50%;text-align: center;vertical-align: middle;">
+              <h5>Login with face recognition</h5>
+              <!-- <input type="username" id="accountName" name="accountName" placeholder="Account Name"><br> -->
+              <input id="ImageB64" name="ImageB64" type="hidden">
+
+              <div id="foto">
+                <div class="video-wrap">
+                  <video id="video" playsinline autoplay width="500" height="250"></video>
+                </div>
+                
+                <!-- Webcam video snapshot -->
+                <canvas id="canvas" style="display: none;"></canvas>
+
+              </div>
+            
+              <center>
+                <div id="capturado" style="width: 80%;"></div>
+              </center>
+            </td>
+            <td style="width: 50%;text-align: center;vertical-align: middle;">
+              <h5>Login with password</h5>
               <input type="password" id="accountPass" value="" name="accountPass" placeholder="Password"><br>
-              <input type="submit" value="Login" class="loginbtn" style="width: 30%;text-align: center;vertical-align: middle;" />
-            </form>
-          </td>
-        </tr>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2" style="text-align: center;">
+              <input type="submit" value="Login" class="loginbtn" style="margin: 15px;" />
+            </td>
+          </tr>
       </table> 
       </form>
 
       <!-- Register method -->
-      <p>
+      <br>
         <Form method="GET" action="/Registration">
           <input type="submit" class="loginbtn" value="Register">
         </Form>
-      </p>
+      <br>
     </div>
     
     <script>
