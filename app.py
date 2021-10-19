@@ -1,4 +1,5 @@
 import os, shutil
+import re
 from flask import Flask, request, redirect, flash, render_template, session, send_file
 from flaskext.mysql import MySQL
 
@@ -43,15 +44,12 @@ def registeroperation():
 
     #VALIDATION
     #REGEX Validation needs reworking to fit python
-    pwd_expression = "/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-])/"
-    letters = "/^[A-Za-z]+$/"
-    filter = "/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/"
-
+    emailValidation = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
     if(accName==''):
         flash('Please enter your account\'s name\/handle.')
         return redirect("/Registration")
-       elif not re.match("^[a-zA-Z0-9_.-]+$", accName):
-        flash('Account\s name handle most have just letters, . or _')
+    elif not re.match("^[a-zA-Z0-9_.-]+$", accName):
+        flash('Account\'s name/handle should not have symbols other than "_", "." and "-"')
         return redirect("/Registration")
     # else if(!preg_match($letters,$accName)) {
     #     header("Location: Registration.html?message=AccNOnlyAlph");
@@ -59,9 +57,9 @@ def registeroperation():
     elif(accMail==''):
         flash('Please enter your E-Mail.')
         return redirect("/Registration")
-    # else if (!preg_match($filter,$accMail)) {
-    #     header("Location: Registration.html?message=accMInv");
-    # }
+    elif not (re.fullmatch(emailValidation, accMail)):
+        flash('Please enter a valid email.')
+        return redirect("/Registration")
     elif(accPass==''):
         flash('Please enter your password.')
         return redirect("/Registration")
@@ -69,7 +67,7 @@ def registeroperation():
     # else if(!preg_match($pwd_expression,$accPass)){
     #     header("Location: Registration.html?message=PssInv");
     # }
-     elif(accImageB64=='' or accImageB64 == None):
+    elif(accImageB64=='' or accImageB64 == None):
         flash('Please upload an image.')
         return redirect("/Registration")
     elif(len(accPass) < 6):
@@ -112,7 +110,7 @@ def loginperation():
     conn = mysql.connect()
     cursor =conn.cursor()
    
-     if accPass is not None and accPass != '':
+    if accPass is not None and accPass != '':
         cursor.execute("SELECT * FROM users WHERE Handle='"+accName+"' AND Password='"+accPass+"';")
         data = cursor.fetchone()
 
@@ -127,7 +125,7 @@ def loginperation():
     data = cursor.fetchone()
 
     if(data is not None):
-       convert_and_save(accImageB64,accName+"_attempt_login")
+        convert_and_save(accImageB64,accName+"_attempt_login")
         if compare(accName+"_attempt_login.jpg", data[4]):
             session['accountID'] = data[0]
             return redirect("/Main")
@@ -150,7 +148,7 @@ def mainView():
 def ItemTables():
     chckDir(session['accountID'])
     userFiles = os.listdir("UserRepos/"+str(session['accountID'])+"/Files")
-   return render_template('ItemTables.html', files=userFiles)
+    return render_template('ItemTables.html', files=userFiles)
     #session['currentDirectory'] = "UserRepos/"+str(session['accountID'])+"/Files"
     #return redirect("/ItemTablesList")
 
@@ -256,10 +254,7 @@ def chckDir(id):
 ####
 import base64 
 import boto3
-import botocore
-from PIL import *
-import io
-import PIL.Image as Image
+
 import creds
 from botocore.exceptions import ClientError, PaginationError
 from boto3.dynamodb.conditions import Key, Attr
