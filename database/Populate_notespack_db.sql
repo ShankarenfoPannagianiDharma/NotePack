@@ -33,6 +33,8 @@ CREATE TABLE `chatrooms` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
+ALTER TABLE users
+ADD COLUMN Image VARCHAR(255) AFTER Email;
 
 --
 -- Table structure for table `roommembers`

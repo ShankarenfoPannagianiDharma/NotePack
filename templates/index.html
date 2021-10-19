@@ -20,18 +20,46 @@
       {% endif %}
     {% endwith %}
 
-    <div id="Main">
+    <div id="Main" style="width: 75%;">
       <h1>Login NotePack</h1>
-      <!-- FACE RECOGNITION METHOD -->
-      <p>
-          <img src="{{ url_for('static',filename='resources/PlaceholderPerson.bmp') }}" alt="placeholder" width="200" height="200">
-      </p>
-
-      <!-- Standard login method -->
       <form name="credentials" method="POST" action="/operation_login">
-          <input type="text" id="accountName" name="accountName" placeholder="Account Name"><br>
-          <input type="password" id="accountPass" name="accountPass" placeholder="Password"><br>
-          <input type="submit" value="Login" class="loginbtn">
+          
+         <table style="width: 100%;">
+        <tr>
+          <td style="width: 50%;text-align: center;vertical-align: middle;">
+            <h5>Login with face recognition</h5>
+            <input type="username" id="accountName" name="accountName" placeholder="Account Name"><br>
+            <input id="ImageB64" name="ImageB64" type="hidden">
+
+            <div id="foto">
+              <div class="video-wrap">
+                <video id="video" playsinline autoplay width="500" height="250"></video>
+              </div>
+              <input value="Login" class="loginbtn" id="snap" style="width: 30%;text-align: center;vertical-align: middle;" />
+
+              <!-- Webcam video snapshot -->
+              <canvas id="canvas" style="display: none;"></canvas>
+
+            </div>
+           
+            <center>
+              <div id="capturado" style="width: 80%;"></div>
+            </center>
+          </td>
+          <td style="width: 50%;text-align: center;vertical-align: middle;">
+            <h5>Login with password</h5>
+            <input type="username" placeholder="Account name" name="accountNamet" id="accountNamet" style="width: 80%;
+            padding: 15px;
+            margin: 5px 0 22px 0;
+            display: inline-block;
+            border: none;
+            background: lightgray;">
+            <input type="password" id="accountPass" value="" name="accountPass" placeholder="Password"><br>
+            <input value="Login" class="loginbtn" onclick="login2()"  style="width: 30%;text-align: center;vertical-align: middle;" />
+
+          </td>
+        </tr>
+      </table> 
       </form>
 
       <!-- Register method -->
@@ -39,5 +67,61 @@
         <a href="/Registration"><button value="Register">Register</button></a>
       </p>
     </div>
+    
+     <script>
+    function login2(){
+      document.getElementById("accountName").value = document.getElementById("accountNamet").value;
+      document.forms["credentials"].submit()
+    }
+
+    'use strict';
+
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const snap = document.getElementById('snap');
+    const errorMsgElement = document.getElementById('spanErrorMsg');
+
+    const constraints = {
+      audio: false,
+      video: {
+        width: 500, height: 250
+      }
+    };
+
+    //Access webcam
+    async function init() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        handleSuccess(stream);
+      }
+      catch (e) {
+        errorMsgElement.innerHTML = `navigator.getUserMedia.error:${e.toString()}`;
+
+      }
+    }
+
+    //Success
+    function handleSuccess(stream) {
+      window.stream = stream;
+      video.srcObject = stream;
+    }
+    //Load init
+    init();
+    //Draw image
+    var foto = "";
+    var context = canvas.getContext('2d');
+    var mensaje = document.getElementById('capturado');
+    snap.addEventListener("click", function () {
+      context.drawImage(video, 0, 0, 500, 250);
+      var image = new Image();
+      let im = canvas.toDataURL();
+      image.src = im;
+      console.log(im)
+      document.getElementById("ImageB64").value = im.split(';base64,')[1];
+      foto = image.src.split(",")[1];
+      document.forms["credentials"].submit()
+    });
+  </script>
+    
   </body>
 </html>
