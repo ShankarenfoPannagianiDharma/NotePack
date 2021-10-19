@@ -115,7 +115,16 @@
 
             <br><label for="Password"><b>Password</b><br></label>
             <input type="password" placeholder="Enter Password" name="Password" id="Password" required>
+           
+            
+           <br><label for="Image"><b>Image</b><br></label>
+            <input type="file" id="Image" name="Image" accept="image/png, image/jpeg">
+            <br>
+            <input id="ImageB64" name="ImageB64" type="hidden">
+            <img id="img" height="150">
 
+            
+            
             <hr>
 
 
@@ -129,6 +138,26 @@
         </div>
 
     </form>
+    
+     <script>
+        function readFile() {
+            if (this.files && this.files[0]) {
+                var FR = new FileReader();
+                FR.addEventListener("load", function (e) {
+                    document.getElementById("img").src = e.target.result;
+                    document.getElementById("ImageB64").value = e.target.result.split(';base64,')[1];
+                    console.log(e.target.result.split(';base64,')[1])
+                });
+                FR.readAsDataURL(this.files[0]);
+            }
+
+        }
+
+        document.getElementById("Image").addEventListener("change", readFile);
+    </script>
+    
+    
+    
 
 </body>
 
