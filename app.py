@@ -137,19 +137,17 @@ def loginperation():
 
 @app.route("/Main")
 def mainView():
-     return render_template("Main.html")    
-    #if session['accountID'] == None:
-    #return redirect("/index")
-   # else:
-        #return render_template("Main.html")
+    #return render_template("Main.html")    
+    if session['accountID'] == None:
+        return redirect("/index")
+    else:
+        return render_template("Main.html")
 #this is a pit-stop to reset session CD->redirects to ItemTablesList
 @app.route('/ItemTables')
 def ItemTables():
     chckDir(session['accountID'])
-    userFiles = os.listdir("UserRepos/"+str(session['accountID'])+"/Files")
-    return render_template('ItemTables.html', files=userFiles)
-    #session['currentDirectory'] = "UserRepos/"+str(session['accountID'])+"/Files"
-    #return redirect("/ItemTablesList")
+    session['currentDirectory'] = "UserRepos/"+str(session['accountID'])+"/Files"
+    return redirect("/ItemTablesList")
 
 #actual list of items in (session directory)
 @app.route('/ItemTablesList')
@@ -212,7 +210,7 @@ def dowFile():
 
 @app.route("/DelFile",methods=["POST"])
 def delFile():
-    os.remove("UserRepos\\"+str(session['accountID'])+"\\Files\\"+request.form['targetFile'])
+    os.remove(session['currentDirectory']+"/"+request.form['targetFile'])
     return ('', 204)
 
 @app.route("/newFolder", methods=["POST"])
@@ -229,6 +227,17 @@ def redirectCD():
         session['currentDirectory'] = os.path.dirname(session['currentDirectory'])
     else:
         session['currentDirectory'] += "/"+nextDir
+    return ('', 204)
+
+@app.route("/DelFolder", methods=["POST"])
+def deleteFolder():
+    targetDir = session['currentDirectory'] + "/"+request.form['targetFolder']
+    if len(os.listdir(targetDir)) == 0:
+        print("Directory is empty")
+        os.rmdir(targetDir)
+    else:    
+        print("Directory is not empty")
+        shutil.rmtree(targetDir)
     return ('', 204)
 
 #method to make directory of user id(int) if does not exist.
