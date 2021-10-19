@@ -1,6 +1,7 @@
 import os, shutil ,re
 from flask import Flask, request, redirect, flash, render_template, session, send_file
 from flaskext.mysql import MySQL
+import re
 
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 1
@@ -11,7 +12,7 @@ if __name__ == '__main__':
 
 mysql = MySQL()
 app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = ''
+app.config['MYSQL_DATABASE_PASSWORD'] = '1234'
 app.config['MYSQL_DATABASE_DB'] = 'notespack_db'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 mysql.init_app(app)
@@ -44,6 +45,11 @@ def registeroperation():
     #VALIDATION
     #REGEX Validation needs reworking to fit python
     emailValidation = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    pwd_expression = "/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-])/"
+    letters = "/^[A-Za-z]+$/"
+    filter = "/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/"
+
+    
     if(accName==''):
         flash('Please enter your account\'s name\/handle.')
         return redirect("/Registration")
@@ -241,7 +247,10 @@ def chckDir(id):
 ####
 import base64 
 import boto3
-
+import botocore
+from PIL import *
+import io
+import PIL.Image as Image
 import creds
 from botocore.exceptions import ClientError, PaginationError
 from boto3.dynamodb.conditions import Key, Attr
