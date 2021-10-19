@@ -84,7 +84,8 @@ def registeroperation():
     cursor =conn.cursor()
 
     try:
-        cursor.execute("INSERT INTO users (Handle, Password, Email, Image) VALUES ('"+accName+"','"+accPass+"','"+accMail+"')")
+        #TODO: Image must be optional
+        cursor.execute("INSERT INTO users (Handle, Password, Email) VALUES ('"+accName+"','"+accPass+"','"+accMail+"')")
         conn.commit()
         cursor.execute("SELECT ID_User FROM users WHERE Handle='"+accName+"' AND Password='"+accPass+"';")
         data = cursor.fetchone()
@@ -92,11 +93,11 @@ def registeroperation():
         session['accountID'] = data[0]
 
         #now save image (if given)
-        if(accImageB64 != None or accImageB64!=''):
-            #Generate image name
-            accImage = accName.replace(" ","_").replace(".","_")+"_user_image"
-            #Save image
-            convert_and_save(accImageB64,accImage)
+        # if(accImageB64 != None or accImageB64!=''):
+        #     #Generate image name
+        #     accImage = accName.replace(" ","_").replace(".","_")+"_user_image"
+        #     #Save image
+        #     convert_and_save(accImageB64,accImage)
             #TODO: STORE IMAGE SOMEWHERE
 
         return redirect("/Main")

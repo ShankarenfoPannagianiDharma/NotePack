@@ -21,7 +21,7 @@
     {% endwith %}
 
     <div id="Main" style="width: 75%;">
-      <h1>Login NotePack</h1>
+      <h1>Login to NotePack</h1>
       <form name="credentials" method="POST" action="/operation_login">
           
          <table style="width: 100%;">
@@ -65,7 +65,9 @@
 
       <!-- Register method -->
       <p>
-        <a href="/Registration"><button value="Register">Register</button></a>
+        <Form method="GET" action="/Registration">
+          <input type="submit" class="loginbtn" value="Register">
+        </Form>
       </p>
     </div>
     

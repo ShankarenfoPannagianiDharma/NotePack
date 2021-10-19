@@ -5,9 +5,11 @@
            p {text-align: center; max-width: min-content;}
         </style>
     </head>
-    <body onload="loadProfile()">
+    <body>
         <p>
-            <img src="{{ url_for('static',filename='userimages/'+userData[4]) }}" width="200" height="200">
+            <!-- Put photo if available, if not, placeholder -->
+                <img style="width: 300px;" src="{{ url_for('static', filename='resources/PlaceholderPerson.bmp') }}">
+            <!--<img src="{{ url_for('static',filename='userimages/'+userData[1]) }}" width="200" height="200"> -->
         </p>
         <br>
         <p>{{userData[1]}}</p>
