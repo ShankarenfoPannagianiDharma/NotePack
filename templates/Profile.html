@@ -7,10 +7,42 @@
     </head>
     <body onload="loadProfile()">
         <p>
-            <img src="{{ url_for('static',filename='resources/PlaceholderPerson.bmp') }}" width="200" height="200">
+            <img src="{{ url_for('static',filename='userimages/'+userData[4]) }}" width="200" height="200">
         </p>
         <br>
         <p>{{userData[1]}}</p>
         <p>{{userData[3]}}</p>
+        <br>
+    <br>
+    <hr>
+    <h3>Change profile picture</h3>
+    <form name="RegForm" action="/change_picture" method="post">
+        <div class="container">
+            <br><label for="Image"><b>Image</b><br></label>
+            <input type="file" id="Image" name="Image" accept="image/png, image/jpeg">
+            <br>
+            <input id="ImageB64" name="ImageB64" type="hidden">
+            <img id="img" height="150">
+
+            <button type="submit" class="registerbtn">Change picture</button>
+        </div>
+
+    </form>
+    <script>
+        function readFile() {
+            if (this.files && this.files[0]) {
+                var FR = new FileReader();
+                FR.addEventListener("load", function (e) {
+                    document.getElementById("img").src = e.target.result;
+                    document.getElementById("ImageB64").value = e.target.result.split(';base64,')[1];
+                    console.log(e.target.result.split(';base64,')[1])
+                });
+                FR.readAsDataURL(this.files[0]);
+            }
+
+        }
+
+        document.getElementById("Image").addEventListener("change", readFile);
+    </script>
     </body>
 </html>
