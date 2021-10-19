@@ -37,7 +37,7 @@
                         <td style="background-color: darkgoldenrod;">
                             <a id="goDir" href="/moveCD" movement="{{ fldr }}">{{ fldr }}</a>
                             <form id="deleteTargetFolder" class="TinyForm" action="/DelFolder" method="post">
-                                <input type="hidden" name="targetFolder" value={{ fldr }}>
+                                <input type="hidden" name="targetFile" value={{ fldr }}>
                                 <input type="submit" name="Delete" value="Delete" />
                             </form>            
                         </td>
@@ -154,20 +154,8 @@
                     type: "POST",
                     url: url,
                     data: form.serialize(),
-                    success: function(){location.reload();}
+                    success: function(data){location.reload();}
                     });
-            });
-            //form submit delete Folder (Absolutely NOT SAFE for accidents!)
-            $("deleteTargetFolder").submit(function(e){
-                e.preventDefault();
-                var form = $(this);
-                var url = form.attr('action');
-                $.ajax({
-                    type: "POST",
-                    url: url,
-                    data: form.serialize(),
-                    success: function(){location.reload();}
-                });
             });
 
             //HREF links to move directories up/down
@@ -177,7 +165,7 @@
                     type: "POST",
                     url: "/moveCD",
                     data: {movement:$(this).attr("movement")},
-                    success: function(){location.reload();}
+                    success: function(data){location.reload();}
                     });
             });
 
