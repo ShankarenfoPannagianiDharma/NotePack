@@ -55,7 +55,7 @@ CREATE TABLE `roommembers` (
 CREATE TABLE `users` (
   `ID_User` int(10) UNSIGNED NOT NULL,
   `Handle` varchar(45) NOT NULL,
-  `Password` varchar(16) NOT NULL DEFAULT '',
+  `Password` varchar(45) NOT NULL DEFAULT '',
   `Email` varchar(45) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 

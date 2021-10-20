@@ -49,6 +49,9 @@ def registeroperation():
     if(accName==''):
         flash('Please enter your account\'s name\/handle.')
         return redirect("/Registration")
+    elif(len(accName)>45):
+        flash('Account name too long. Must be less than 45 characters.')
+        return redirect("/Registration")
     elif not re.match("^[a-zA-Z0-9_.-]+$", accName):
         flash('Account\'s name/handle should not have symbols other than "_", "." and "-"')
         return redirect("/Registration")
@@ -57,6 +60,9 @@ def registeroperation():
     # }
     elif(accMail==''):
         flash('Please enter your E-Mail.')
+        return redirect("/Registration")
+    elif(len(accMail)>45):
+        flash('Email too long. Must be less than 45 characters.')
         return redirect("/Registration")
     elif not (re.fullmatch(emailValidation, accMail)):
         flash('Please enter a valid email.')
@@ -75,8 +81,8 @@ def registeroperation():
     elif(len(accPass) < 6):
         flash('Password should be more than 6 characters.')
         return redirect("/Registration")
-    elif(len(accPass) > 12):
-        flash('Password should be less than 12 characters.')
+    elif(len(accPass)>45):
+        flash('Password too long. Must be less than 45 characters.')
         return redirect("/Registration")
     
     #connect to db
@@ -84,7 +90,6 @@ def registeroperation():
     cursor =conn.cursor()
 
     try:
-        #TODO: Image must be optional
         cursor.execute("INSERT INTO users (Handle, Password, Email) VALUES ('"+accName+"','"+accPass+"','"+accMail+"')")
         conn.commit()
         cursor.execute("SELECT ID_User FROM users WHERE Handle='"+accName+"' AND Password='"+accPass+"';")
@@ -93,12 +98,11 @@ def registeroperation():
         session['accountID'] = data[0]
 
         #now save image (if given)
-        # if(accImageB64 != None or accImageB64!=''):
-        #     #Generate image name
-        #     accImage = accName.replace(" ","_").replace(".","_")+"_user_image"
-        #     #Save image
-        #     convert_and_save(accImageB64,accImage)
-            #TODO: STORE IMAGE SOMEWHERE
+        if(accImageB64 != None or accImageB64!=''):
+            #Generate image name
+            accImage = accName.replace(" ","_").replace(".","_")+"_user_image"
+            #Save image into static/userimages
+            convert_and_save(accImageB64,accImage)
 
         return redirect("/Main")
     except Exception as e:
@@ -111,12 +115,14 @@ def loginOperation():
     accName = request.form['accountName']  
     accPass = request.form['accountPass'] 
     accImageB64 = request.form['ImageB64']  
-
     #connect to db
     conn = mysql.connect()
     cursor =conn.cursor()
-   
+
+    #login with password (Priority)
     if accPass is not None and accPass != '':
+        print("password login"+accPass)
+        print("SELECT * FROM users WHERE Handle='"+accName+"' AND Password='"+accPass+"';")
         cursor.execute("SELECT * FROM users WHERE Handle='"+accName+"' AND Password='"+accPass+"';")
         data = cursor.fetchone()
 
@@ -124,22 +130,32 @@ def loginOperation():
             session['accountID'] = data[0]
             return redirect("/Main")
         else:
-            flash('User not found')
+            flash('User not found or password incorrect.')
             return redirect('/')
 
-    cursor.execute("SELECT * FROM users WHERE Handle='"+accName+"';")
-    data = cursor.fetchone()
+    elif(accImageB64 is not None and accImageB64 != ''):   #login with face recog
+        print("face login")
+        cursor.execute("SELECT * FROM users WHERE Handle='"+accName+"';")
+        data = cursor.fetchone()
 
-    if(data is not None):
-        #convert_and_save(accImageB64,accName+"_attempt_login")
-        #if compare(accName+"_attempt_login.jpg", data[4]):
-            session['accountID'] = data[0]
-            return redirect("/Main")
-        #else:
-            #flash('User not recognized')
-            #return redirect('/')
+        if(data is not None):
+            if not os.path.exists("static\\userimages\\"):
+                os.makedirs("static\\userimages\\")
+            filename="static\\userimages\\temp.jpg"
+            imgdata = base64.b64decode(accImageB64)
+            with open(filename, 'wb') as f:
+                f.write(imgdata)
+            if compare(accName+"_attempt_login.jpg"):
+                session['accountID'] = data[0]
+                return redirect("/Main")
+            else:
+                flash('User not recognized')
+                return redirect('/')
+        else:
+            flash('User not found')
+            return redirect('/')
     else:
-        flash('User not found')
+        flash('Please enter password or take picture.')
         return redirect('/')
 
 @app.route("/Main")
@@ -285,15 +301,17 @@ def change_picture():
     return redirect(url_for('Profile', userData=data))
 
 def convert_and_save(b64_string, name):
+    #if userimages does not exist, create them.
+    if not os.path.exists("static\\userimages\\"):
+        os.makedirs("static\\userimages\\")
     filename="static\\userimages\\"+name+".jpg"
     imgdata = base64.b64decode(b64_string)
     with open(filename, 'wb') as f:
         f.write(imgdata)
 
 
-def compare(source_image_name, target_image_name):
-    rekognition_client = boto3.client(
-        'rekognition',
+def compare(source_image_name):
+    rekognition_client = boto3.client('rekognition',
         aws_access_key_id=creds.rekognition['access_key_id'],
         aws_secret_access_key=creds.rekognition['secret_access_key'],
         region_name=creds.rekognition['region'],
@@ -301,7 +319,7 @@ def compare(source_image_name, target_image_name):
     
     FOLDER_NAME = 'static/userimages'
     source_image_path = '%s/%s' % (FOLDER_NAME, source_image_name)
-    target_image_path = '%s/%s' % (FOLDER_NAME, target_image_name)
+    target_image_path = '%s/%s' % (FOLDER_NAME, "temp.jpg")
 
     source_bytes = open(source_image_path, 'rb')
     target_bytes = open(target_image_path, 'rb')
