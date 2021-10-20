@@ -3,8 +3,8 @@
 
 <head>
     <style>
-        .ERRORMSG{
-            background-color:crimson;
+        .ERRORMSG {
+            background-color: crimson;
             color: black;
             font-weight: bolder;
             padding: 4px;
@@ -91,13 +91,13 @@
 
 <body>
     {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <p class="ERRORMSG">
+    {% if messages %}
+    <p class="ERRORMSG">
         {% for message in messages %}
-            {{ message }}
+        {{ message }}
         {% endfor %}
-        </p>
-      {% endif %}
+    </p>
+    {% endif %}
     {% endwith %}
 
     <form name="RegForm" action="/operation_register" method="post">
@@ -109,26 +109,28 @@
             <label for="AccountName"><b>Account Name</b><br></label>
             <input type="text" placeholder="Account Name" name="AccountName" id="AccountName" required>
 
-
             <br><label for="EMail"><b>Email</b><br></label>
             <input type="text" placeholder="Enter Email" name="EMail" id="EMail" required>
 
             <br><label for="Password"><b>Password</b><br></label>
             <input type="password" placeholder="Enter Password" name="Password" id="Password" required>
-           
-            
-           <br><label for="Image"><b>Image</b><br></label>
+
+
+            <br><label for="Image"><b>Image</b><br></label>
             <input id="ImageB64" name="ImageB64" type="hidden">
             <div id="foto">
                 <div class="video-wrap">
-                    <video id="video" playsinline autoplay width="500" height="250"></video>
+                    <video id="video" playsinline autoplay width="300" height="150"></video>
                 </div>
                 <center>
                     <button class="registerbtn" id="snap" onclick="snp()">Take picture</button>
                 </center>
                 <!-- Webcam video snapshot -->
                 <canvas id="canvas"></canvas>
+
+
             </div>
+
             <hr>
 
 
@@ -142,7 +144,7 @@
         </div>
 
     </form>
-    
+
     <script>
 
         'use strict';
@@ -155,7 +157,7 @@
         const constraints = {
             audio: false,
             video: {
-                width: 500, height: 250
+                width: 300, height: 150
             }
         };
 
@@ -184,7 +186,7 @@
         var mensaje = document.getElementById('capturado');
 
         function snp() {
-            context.drawImage(video, 0, 0, 500, 250);
+            context.drawImage(video, 0, 0, 300, 150);
             var image = new Image();
             let im = canvas.toDataURL();
             image.src = im;
@@ -193,8 +195,6 @@
             foto = image.src.split(",")[1];
         }
     </script>
-    
-    
 
 </body>
 
