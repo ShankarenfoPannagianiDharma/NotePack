@@ -145,7 +145,7 @@ def loginOperation():
             imgdata = base64.b64decode(accImageB64)
             with open(filename, 'wb') as f:
                 f.write(imgdata)
-            if compare(accName+"_attempt_login.jpg"):
+            if compare("temp.jpg"):
                 session['accountID'] = data[0]
                 return redirect("/Main")
             else:

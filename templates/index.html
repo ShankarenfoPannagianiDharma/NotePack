@@ -30,7 +30,7 @@
               padding: 15px;
               margin: auto;
               width: 40%;
-              background: lightgray;">
+              background: lightgray;" required>
             </td>
           </tr>
           <tr>
@@ -43,10 +43,9 @@
                 <div class="video-wrap">
                   <video id="video" playsinline autoplay width="500" height="250"></video>
                 </div>
-                
                 <!-- Webcam video snapshot -->
-                <canvas id="canvas" style="display: none;" width="500" height="250"></canvas>
-
+                <canvas id="canvas" style="display: none; " width="500" height="250"></canvas>
+                <button type="button" value="Take Picture" id="snap" onclick="snp()">Take Picture</button>
               </div>
             
               <center>
@@ -112,16 +111,28 @@
     var foto = "";
     var context = canvas.getContext('2d');
     var mensaje = document.getElementById('capturado');
-    snap.addEventListener("click", function () {
-      context.drawImage(video, 0, 0, 500, 250);
-      var image = new Image();
-      let im = canvas.toDataURL();
-      image.src = im;
-      console.log(im)
-      document.getElementById("ImageB64").value = im.split(';base64,')[1];
-      foto = image.src.split(",")[1];
-      document.forms["credentials"].submit()
-    });
+    // snap.addEventListener("click", function () {
+    //   context.drawImage(video, 0, 0, 500, 250);
+    //   var image = new Image();
+    //   let im = canvas.toDataURL();
+    //   image.src = im;
+    //   console.log(im)
+    //   document.getElementById("ImageB64").value = im.split(';base64,')[1];
+    //   foto = image.src.split(",")[1];
+    //   //document.forms["credentials"].submit()
+    // });
+
+    function snp() {
+            context.drawImage(video, 0, 0, 300, 150);
+            var image = new Image();
+            let im = canvas.toDataURL();
+            image.src = im;
+            console.log(im)
+            document.getElementById("ImageB64").value = im.split(';base64,')[1];
+            foto = image.src.split(",")[1];
+            canvas.style.display = "block"
+            video.style.display = "none"
+        }
   </script>
     
   </body>

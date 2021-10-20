@@ -109,28 +109,26 @@
             <label for="AccountName"><b>Account Name</b><br></label>
             <input type="text" placeholder="Account Name" name="AccountName" id="AccountName" required>
 
+
             <br><label for="EMail"><b>Email</b><br></label>
             <input type="text" placeholder="Enter Email" name="EMail" id="EMail" required>
 
             <br><label for="Password"><b>Password</b><br></label>
             <input type="password" placeholder="Enter Password" name="Password" id="Password" required>
-
-
-            <br><label for="Image"><b>Image</b><br></label>
-            <input id="ImageB64" name="ImageB64" type="hidden">
-            <div id="foto">
-                <div class="video-wrap">
-                    <video id="video" playsinline autoplay width="300" height="150"></video>
-                </div>
-                <center>
-                    <button class="registerbtn" id="snap" onclick="snp()">Take picture</button>
-                </center>
-                <!-- Webcam video snapshot -->
-                <canvas id="canvas"></canvas>
-
-
+           
+            
+           <br><label for="Image"><b>Image</b><br></label>
+           <input id="ImageB64" name="ImageB64" type="hidden">
+           <div id="foto">
+            <div class="video-wrap">
+                <video id="video" playsinline autoplay width="500" height="250"></video>
             </div>
-
+            <center>
+                <input type="button" class="registerbtn" id="snap" onclick="snp()" value="Take Picture">
+            </center>
+            <!-- Webcam video snapshot -->
+            <canvas id="canvas"></canvas>
+            </div>
             <hr>
 
 
