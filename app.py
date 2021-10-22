@@ -294,9 +294,9 @@ def change_picture():
     #connect to db, get user details
     conn = mysql.connect()
     cursor =conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE ID_User="+str(session['accountID'])+";")
+    cursor.execute("SELECT handle FROM users WHERE ID_User="+str(session['accountID'])+";")
     data = cursor.fetchone()
-    convert_and_save(accImageB64,data[4].split(".")[0])
+    convert_and_save(accImageB64,data[0])
     flash('Image changed')
     return redirect(url_for('Profile', userData=data))
 
