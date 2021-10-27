@@ -46,15 +46,21 @@
                 {% for file in files %}
                     <tr>
                         <td>
-                            {{ file }}
+                            {{ file[0] }}
                             <form class="TinyForm" action="/DelFile" id="DeleteTargetFile" method="post">
-                                <input type="hidden" name="targetFile" value={{ file }}>
+                                <input type="hidden" name="targetFile" value={{ file[0] }}>
                                 <input type="submit" name="Delete" value="Delete" />
                             </form>
                             <form class="TinyForm" action="/DowFile" method="post">
-                                <input type="hidden" name="targetFile" value={{ file }}>
+                                <input type="hidden" name="targetFile" value={{ file[0] }}>
                                 <input type="submit" name="Download" value="Download" />
-                            </form>                                                
+                            </form>     
+                            {% if file[1] %}
+                                <form class="TinyForm" id="EditTextFile" action="/Notes" method="post">
+                                    <input type="hidden" name="targetFile" value={{ file[0] }}>
+                                    <input type="submit" name="EditText" value="Edit" />
+                                </form> 
+                            {% endif %}                                           
                         </td>
                     </tr>
                 {% endfor %}

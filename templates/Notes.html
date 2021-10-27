@@ -1,19 +1,64 @@
 <html>
     <head>
         <link rel="stylesheet" href="{{ url_for('static',filename='styles/GeneralStyle.css') }}">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>   
     </head>
     <body>
         <table id="notesTable">
             <tr>
-                <td style="width: 5%;"><button>Save</button></td>
-                <td style="width: 90%;"><input type="text" placeholder="Document Save Location"></td>
-                <td style="width: 5%;"><button>Clear</button></td>
+                <td style="width: 90%;">
+                    <label for="targetSaveName">Filename:</label>
+                    <input type="text" name="targetSaveName" id="targetSaveName" value = "{{ originalFilename }}">
+                    </select> 
+                </td>
+                <td style="width: 5%;" rowspan="2"><button id="saveNote" onclick="saveNote()">Save</button></td>
+                <td style="width: 5%;" rowspan="2"><button>Clear</button></td>
             </tr>
             <tr>
-               <td id="notesArea" colspan="3">
-                   <textarea rows="12"></textarea>
+                <td style="width: 90%;">
+                    <label for="targetSaveLoc">Save Location:</label>
+                    <select name="targetSaveLoc" id="targetSaveLoc">
+                        <!-- Save options: directories -->
+                        {% for fldr in allFolders %}
+                            <option value="{{ fldr }}" 
+                                {% if fldr == originalLoc %}
+                                    selected
+                                {% endif %} 
+                            >{{ fldr }}</option>
+                        {% endfor %}
+                    </select> 
+                </td>
+            </tr>
+            <tr>
+               <td id="notesCell" colspan="3">
+                   <textarea id="notesArea" rows="14">{{ originalText }}</textarea>
                </td> 
             </tr>
         </table>
+
+        <script>
+            function saveNote(){
+                targetFolder = document.getElementById("targetSaveLoc").value;
+                targetSaveName= document.getElementById("targetSaveName").value;
+                noteText = document.getElementById("notesArea").value;
+
+                //make POST
+                $.post(
+                    "/POSTSaveNotes",
+                    {
+                        fileName: targetSaveName,
+                        targetSaveLoc: targetFolder,
+                        text: noteText
+                    },
+                    function(){alert("File Saved!");}
+                );
+            }
+
+            function clearNote(){
+                document.getElementById("targetSaveLoc").value;
+                document.getElementById("targetSaveName").value;
+                document.getElementById("notesArea").value;
+            }
+        </script>
     </body>
 </html>
