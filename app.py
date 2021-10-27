@@ -1,4 +1,4 @@
-import os, shutil ,re
+import os, shutil ,re, flask
 from flask import Flask, request, redirect, flash, render_template, session, send_file
 from flaskext.mysql import MySQL
 import re
@@ -178,14 +178,17 @@ def ItemTablesList():
     if(session['currentDirectory'] != "UserRepos/"+str(session['accountID'])+"/Files"):
         isRoot = False
 
-    filesList = list()
+    filesList = list()  #stores tuple [fileName.Ext, isText]
     foldrList = list()
     # separate directories and files
     for entry in os.scandir(session['currentDirectory']):
         if entry.is_dir():
             foldrList.append(entry.name)
         else:
-            filesList.append(entry.name)
+            txtFile = False
+            if entry.name.endswith(".txt"):
+                txtFile = True
+            filesList.append([entry.name,txtFile])
 
     #serve template with params:list of files, list of folders, boolean if it is root
     return render_template('ItemTables.html', files=filesList, foldrs=foldrList, isRoot=isRoot)
@@ -193,13 +196,25 @@ def ItemTablesList():
 @app.route('/Chat')
 def Chat():
     return render_template('Chat.html')
-@app.route('/Notes')
+@app.route('/Notes', methods=["GET","POST"])
 def Notes():
     allFolders = list()
+    originalFilename = ""
+    originalLocation = ""
+    originalText = ""
+
+    #if editing a file
+    if flask.request.method == 'POST':
+        originalFilename = flask.request.values.get('targetFile').replace(".txt","")
+        originalLocation = session['currentDirectory'].replace("UserRepos/"+str(session['accountID'])+"/Files","").replace("/","\\")+"\\"
+        f = open(session['currentDirectory']+"\\"+flask.request.values.get('targetFile'))
+        originalText = f.read()
+    
     for x in os.walk("UserRepos\\"+str(session['accountID'])+"\\Files"):
         dir = x[0].replace("UserRepos\\"+str(session['accountID'])+"\\Files","")
         allFolders.append(dir+"\\")
-    return render_template('Notes.html', allFolders = allFolders)
+    return render_template('Notes.html', allFolders = allFolders, originalFilename = originalFilename, originalLoc = originalLocation, originalText=originalText)
+
 @app.route('/Profile')
 def Profile():
     if(session['accountID'] is None or session['accountID'] == ''):
@@ -260,10 +275,8 @@ def deleteFolder():
     targetDir = session['currentDirectory'] + "/"+request.form['targetFolder']
     print(targetDir)
     if len(os.listdir(targetDir)) == 0:
-        print("Directory is empty")
         os.rmdir(targetDir)
     else:    
-        print("Directory is not empty")
         shutil.rmtree(targetDir)
     return ('', 204)
 
