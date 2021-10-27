@@ -121,8 +121,6 @@ def loginOperation():
 
     #login with password (Priority)
     if accPass is not None and accPass != '':
-        print("password login"+accPass)
-        print("SELECT * FROM users WHERE Handle='"+accName+"' AND Password='"+accPass+"';")
         cursor.execute("SELECT * FROM users WHERE Handle='"+accName+"' AND Password='"+accPass+"';")
         data = cursor.fetchone()
 
@@ -197,7 +195,11 @@ def Chat():
     return render_template('Chat.html')
 @app.route('/Notes')
 def Notes():
-    return render_template('Notes.html')
+    allFolders = list()
+    for x in os.walk("UserRepos\\"+str(session['accountID'])+"\\Files"):
+        dir = x[0].replace("UserRepos\\"+str(session['accountID'])+"\\Files","")
+        allFolders.append(dir+"\\")
+    return render_template('Notes.html', allFolders = allFolders)
 @app.route('/Profile')
 def Profile():
     if(session['accountID'] is None or session['accountID'] == ''):
@@ -269,6 +271,24 @@ def deleteFolder():
 def chckDir(id):
     if not os.path.exists("UserRepos/"+str(id)+"/Files/"):
         os.makedirs("UserRepos/"+str(id)+"/Files/")
+
+#POST path to save Notes at specified directory
+@app.route("/POSTSaveNotes", methods=["POST"])
+def saveNoteOp():
+    filename = request.form['fileName']
+    targetDir = request.form['targetSaveLoc']
+    text = request.form['text']
+
+    #if no filename
+    if(filename == False or filename == ''):
+        filename = "Untitled"
+
+    targetLoc = "UserRepos\\"+str(session['accountID'])+"\\Files"+targetDir+filename+".txt"
+    f = open(targetLoc, "w+")
+    f.write(text)
+    f.close()
+
+    return ('', 204)
         
 ####
 ## START
