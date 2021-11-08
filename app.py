@@ -195,7 +195,24 @@ def ItemTablesList():
 
 @app.route('/Chat')
 def Chat():
-    return render_template('Chat.html')
+    #connect to db
+    conn = mysql.connect()
+    cursor =conn.cursor()
+    contactAbleUsers = list()
+    #get list of all users that can be chatted with
+    cursor.execute("SELECT * FROM users WHERE NOT ID_User="+str(session['accountID'])+";")
+    data = cursor.fetchall()
+    for entry in data:
+        #if there are other users, add to list
+        contactAbleUsers.append(entry[1])
+    
+    #get list of rooms user is involved in
+    roomsIn = list()
+    #get list of rooms user can see (public) but not in
+    roomsVisible = list()
+
+    return render_template('Chat.html',contactAbleUsers = contactAbleUsers)
+
 @app.route('/Notes', methods=["GET","POST"])
 def Notes():
     allFolders = list()
@@ -303,6 +320,37 @@ def saveNoteOp():
 
     return ('', 204)
         
+#POST action to create new chat group
+@app.route("/POSTNewChatGroup", methods=["POST"])
+def createNewChat():
+    
+    chatName = request.form.get('chatName')         #String text    
+    chatUsers = request.form.getlist('chatUsers')   #array of usernames allowed in chat
+    chatPrivate = request.form.get('isPrivate')     #int value of 1(True) or 0(False)
+    #connect to DB
+    conn = mysql.connect()
+    cursor =conn.cursor()
+    #Make DB chatroom
+    try:
+        cursor.execute("INSERT INTO chatrooms (RoomName,ID_RoomOwner,isPrivate) VALUES ('"+chatName+"',"+str(session['accountID'])+","+chatPrivate+")")
+        conn.commit()
+        #get this specific room's ID
+        cursor.execute("SELECT ID_ChatRoom FROM chatrooms WHERE RoomName='"+chatName+"' AND ID_RoomOwner="+str(session['accountID'])+";")
+        data = cursor.fetchone()
+        roomID = data[0]
+        #insert room members into DB
+        for member in chatUsers:
+            #find member ID
+            cursor.execute("SELECT ID_User FROM users WHERE Handle='"+member+"'")
+            memberID = cursor.fetchone()[0]
+            #add participant users
+            cursor.execute("INSERT INTO roommembers (ID_ChatRoom,ID_Members) VALUES ("+str(roomID)+","+str(memberID)+")")
+    except Exception as e:
+        print(e)
+        flash('Problem in creating chatroom: '+str(e))
+    conn.close()
+    return (redirect('/Chat'))
+
 ####
 ## START
 ####

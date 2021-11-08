@@ -33,7 +33,7 @@ DROP TABLE IF EXISTS notespack_db.users;
 --
 CREATE TABLE `users` (
   `ID_User` int(10) NOT NULL AUTO_INCREMENT,
-  `Handle` varchar(45) NOT NULL,
+  `Handle` varchar(45) NOT NULL UNIQUE,
   `Password` varchar(45) NOT NULL DEFAULT '',
   `Email` varchar(45) NOT NULL,
   PRIMARY KEY (`ID_User`)
@@ -44,7 +44,7 @@ CREATE TABLE `users` (
 --
 CREATE TABLE `chatrooms` (
   `ID_ChatRoom` int(11) NOT NULL AUTO_INCREMENT,
-  `RoomName` varchar(45) NOT NULL,
+  `RoomName` varchar(45) NOT NULL UNIQUE,
   `ID_RoomOwner` int(11) NOT NULL,
   `isPrivate` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`ID_ChatRoom`),
@@ -83,5 +83,8 @@ CREATE TABLE `chatmessages` (
 --
 -- Dumping data for table `users`
 --
-INSERT INTO `users` (`ID_User`, `Handle`, `Password`, `Email`) VALUES
-(1, 'TesterMann', 'test', 'test@gmail.com');
+INSERT INTO `users` (`ID_User`, `Handle`, `Password`, `Email`) VALUES (1, 'TesterMann', 'test', 'test@gmail.com');
+INSERT INTO `users` (`ID_User`, `Handle`, `Password`, `Email`) VALUES (2, 'Michaels', 'test', 'Michaels@gmail.com');
+INSERT INTO `users` (`ID_User`, `Handle`, `Password`, `Email`) VALUES (3, 'Bono', 'test', 'Bono@gmail.com');
+INSERT INTO `users` (`ID_User`, `Handle`, `Password`, `Email`) VALUES (4, 'Tats99', 'test', 'tatts@gmail.com');
+

@@ -1,24 +1,81 @@
 <html>
     <head>
         <link rel="stylesheet" href="{{ url_for('static',filename='styles/GeneralStyle.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static',filename='styles/ChatStyle.css') }}">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>   
+        <script src="{{ url_for('static',filename='javascripts/ChatFunctions.js') }}"></script>
     </head>
-    <body>
-        <table id="chatTable">
+    <body onload="onLoad()">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <p class="ERRORMSG">
+            {% for message in messages %}
+            {{ message }}
+            {% endfor %}
+        </p>
+        {% endif %}
+        {% endwith %}
+
+        <table id="MainScreen" class="MainScreen active">
             <tr>
                 <td rowspan="2" style="width: 30%; background-color: teal;">groups List</td>
                 <td  style="height: 20px; width: 70%;" >GroupName</td>
             </tr>
             <tr>
-                <td style="background-color: steelblue;">Chat Content</td>
+                <td style="background-color: steelblue;">
+                    Chat Content
+                </td>
             </tr>
             <tr>
-                <td><button value="New Chat" style="width: 100%;"></td>
-                <td><input type="text" placeholder="Find user/group" style="width: 100%;"></td>
+                <td>
+                    <input type="text" placeholder="Find user/group" style="width: 100%;">
+                    <button id="CreateNewChat" class="CreateNewChat" onclick="OpenNewChatDialog()" style="width: 100%;">New Chat</button>
+                </td>
                 <td style="height: 20px;">
                     <input type="text" id="chatToSend" placeholder="Chat message here..." style="width: 89%;">
-                    <button style="width: 10%; ;">Send</button>
+                    <button id="SendToChat" style="width: 10%; ;">Send</button>
                 </td>
             </tr>
         </table>
+        <div class="CreateNewChatDialog" id="CreateNewChatDialog">
+            <h2>Create new ChatGroup</h2>
+            <form id="NewChatDialog" class="NewChatDialog" action="/POSTNewChatGroup" method="post">
+                <label for="chatName">Chat Name: </label>
+                <input type="text" id="newChatDialog_InputChatName" name="chatName" required><br>
+                <label for="userSelects">Chat with: </label>
+                <select id="newChatDialog_InputChatUsers" name="chatUsers" multiple required form="NewChatDialog">
+                    <!-- If there are users, show options -->
+                    {% if contactAbleUsers != null %}
+                        <!-- Loop available users -->
+                        {% for userName in contactAbleUsers %}
+                            <option value="{{ userName }}">{{ userName }}</option>
+                        {% endfor %}
+                    {% endif %}
+                    
+                </select><br><br>
+                <label>Is this chat private or public?</label><br>
+                    <input type="radio" id="newChatDialog_InputChatPrivate" name="isPrivate" value=1 checked>
+                    <label for="private">Private</label>
+                    <input type="radio" id="newChatDialog_InputChatPublic" name="isPrivate" value=0>
+                    <label for="public">Public</label><br><br>
+                <input type="submit" value="Create new chat">
+            </form>
+            <br>
+            <button id="CancelNewChatDialog" class="close" onclick="CancelNewChatDialog()">Cancel</button> 
+        </div>
     </body>
+
+    <script>
+        function OpenNewChatDialog(){
+            document.getElementById("CreateNewChatDialog").style.display = "block";
+            document.getElementById("MainScreen").style.display = "none";
+        }
+
+        function CancelNewChatDialog(){
+            document.getElementById("CreateNewChatDialog").style.display = "none";
+            document.getElementById("MainScreen").style.display = "table";
+        }
+
+        
+    </script>
 </html>
