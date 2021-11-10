@@ -205,13 +205,36 @@ def Chat():
     for entry in data:
         #if there are other users, add to list
         contactAbleUsers.append(entry[1])
-    
-    #get list of rooms user is involved in
-    roomsIn = list()
-    #get list of rooms user can see (public) but not in
-    roomsVisible = list()
 
-    return render_template('Chat.html',contactAbleUsers = contactAbleUsers)
+    #get list of rooms where user is owner of 
+    roomsOwn = set()
+    cursor.execute("SELECT * FROM `chatrooms` WHERE ID_RoomOwner="+str(session['accountID'])+";")
+    data = cursor.fetchall()
+    for entry in data:
+        roomsOwn.add(entry)
+
+    #get joined data of rooms and its members
+    cursor.execute("SELECT * FROM `chatrooms` INNER JOIN `roommembers` ON chatrooms.ID_ChatRoom = roommembers.ID_ChatRoom")
+    cursor.execute()
+    data = cursor.fetchall()
+
+    #get list of rooms where user is NOT an owner BUT a member of 
+    roomsIn = set()
+    for entry in data:
+        if(entry[2] != session['accountID'] and entry[4] == session['accountID']):
+            roomsIn.add([entry[1],entry[0]])    #add (roomName, ID)
+
+    #get list of rooms user can see (public) but not in or own
+    roomsVisible = set()
+    cursor.execute()
+    data = cursor.fetchall()
+    for entry in data:  #add all public rooms where user does not own
+        if(entry[3] == 0 and entry[2] != session['accountID']):
+            roomsVisible.add([entry[1],entry[0]])
+    #remove rooms where user is in 
+    roomsVisible.difference_update(roomsIn)
+
+    return render_template('Chat.html',contactAbleUsers = contactAbleUsers,roomsOwn=roomsOwn,roomsIn=roomsIn,roomsVisible=roomsVisible)
 
 @app.route('/Notes', methods=["GET","POST"])
 def Notes():
@@ -341,10 +364,10 @@ def createNewChat():
         #insert room members into DB
         for member in chatUsers:
             #find member ID
-            cursor.execute("SELECT ID_User FROM users WHERE Handle='"+member+"'")
+            cursor.execute("SELECT ID_User FROM users WHERE Handle='"+member+"';")
             memberID = cursor.fetchone()[0]
             #add participant users
-            cursor.execute("INSERT INTO roommembers (ID_ChatRoom,ID_Members) VALUES ("+str(roomID)+","+str(memberID)+")")
+            cursor.execute("INSERT INTO roommembers (ID_ChatRoom,ID_Members) VALUES ("+str(roomID)+","+str(memberID)+");")
     except Exception as e:
         print(e)
         flash('Problem in creating chatroom: '+str(e))

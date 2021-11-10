@@ -48,7 +48,7 @@ CREATE TABLE `chatrooms` (
   `ID_RoomOwner` int(11) NOT NULL,
   `isPrivate` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`ID_ChatRoom`),
-  FOREIGN KEY (`ID_RoomOwner`) REFERENCES users(`ID_User`)
+  FOREIGN KEY (`ID_RoomOwner`) REFERENCES users(`ID_User`) ON DELETE CASCADE,
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -59,8 +59,8 @@ CREATE TABLE `roommembers` (
   `ID_ChatRoom` int(11) NOT NULL,
   `ID_Members` int(11) NOT NULL,
   PRIMARY KEY (`ID_RoomMembers`),
-  FOREIGN KEY (`ID_ChatRoom`) REFERENCES chatrooms(`ID_Chatroom`),
-  FOREIGN KEY (`ID_Members`) REFERENCES users(`ID_User`)
+  FOREIGN KEY (`ID_ChatRoom`) REFERENCES chatrooms(`ID_Chatroom`) ON DELETE CASCADE,
+  FOREIGN KEY (`ID_Members`) REFERENCES users(`ID_User`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -73,8 +73,8 @@ CREATE TABLE `chatmessages` (
   `Content_Msg` text NOT NULL,
   `Timestamp_Msg` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`ID_Msg`),
-  FOREIGN KEY (`ID_ChatRoom`) REFERENCES chatrooms(`ID_Chatroom`),
-  FOREIGN KEY (`ID_User`) REFERENCES users(`ID_User`)
+  FOREIGN KEY (`ID_ChatRoom`) REFERENCES chatrooms(`ID_Chatroom`) ON DELETE CASCADE,
+  FOREIGN KEY (`ID_User`) REFERENCES users(`ID_User`) ON DELETE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 

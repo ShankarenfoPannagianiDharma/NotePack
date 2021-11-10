@@ -16,9 +16,43 @@
         {% endif %}
         {% endwith %}
 
-        <table id="MainScreen" class="MainScreen active">
+        <table id="MainScreen" class="MainScreen">
             <tr>
-                <td rowspan="2" style="width: 30%; background-color: teal;">groups List</td>
+                <td rowspan="2" style="width: 30%; background-color: teal;">
+                    <table class="sideTable">
+                        <thead>Rooms you own</thead>
+                        {% for room in roomsOwn %}
+                            <tr>
+                                <td>
+                                     <button class="btnFill">{{ room[0] }}</button>    
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+
+                    <table class="sideTable">
+                        <thead>Rooms you are in</thead>
+                        {% for room in roomsIn %}
+                            <tr>
+                                <td>
+                                     <button class="btnFill">{{ room[0] }}</button>    
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+
+                    <table class="sideTable">
+                        <thead>Public rooms</thead>
+                        {% for room in roomsVisible %}
+                            <tr>
+                                <td>
+                                     <button class="btnFill">{{ room[1] }}</button>    
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+
+                </td>
                 <td  style="height: 20px; width: 70%;" >GroupName</td>
             </tr>
             <tr>
