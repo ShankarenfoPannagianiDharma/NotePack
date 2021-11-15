@@ -400,12 +400,13 @@ def createNewChat():
             #find member ID
             cursor.execute("SELECT ID_User FROM users WHERE Handle='"+member+"';")
             memberID = cursor.fetchone()[0]
-            #add participant users
+            #add participant users 
             print("INSERT INTO roommembers (ID_ChatRoom,ID_Members) VALUES ("+str(roomID)+","+str(memberID)+");")
             cursor.execute("INSERT INTO roommembers (ID_ChatRoom,ID_Members) VALUES ("+str(roomID)+","+str(memberID)+");")
     except Exception as e:
         print(e)
         flash('Problem in creating chatroom: '+str(e))
+    conn.commit()
     conn.close()
     return (redirect('/Chat'))
 
