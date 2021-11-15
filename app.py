@@ -211,28 +211,60 @@ def Chat():
     cursor.execute("SELECT * FROM `chatrooms` WHERE ID_RoomOwner="+str(session['accountID'])+";")
     data = cursor.fetchall()
     for entry in data:
-        roomsOwn.add(entry)
+        roomsOwn.add(entry[1])
 
     #get joined data of rooms and its members
-    cursor.execute("SELECT * FROM `chatrooms` INNER JOIN `roommembers` ON chatrooms.ID_ChatRoom = roommembers.ID_ChatRoom")
-    cursor.execute()
+    cursor.execute("SELECT * FROM `chatrooms` INNER JOIN `roommembers` ON chatrooms.ID_ChatRoom = roommembers.ID_ChatRoom;")
     data = cursor.fetchall()
 
     #get list of rooms where user is NOT an owner BUT a member of 
     roomsIn = set()
     for entry in data:
-        if(entry[2] != session['accountID'] and entry[4] == session['accountID']):
-            roomsIn.add([entry[1],entry[0]])    #add (roomName, ID)
+        if(entry[2] != session['accountID'] and entry[6] == session['accountID']):
+            roomsIn.add(entry[1])    #add (roomName)
 
     #get list of rooms user can see (public) but not in or own
-    roomsVisible = set()
-    cursor.execute()
+    #get all member rows where rooms are public
+    cursor.execute("SELECT * FROM `chatrooms` INNER JOIN `roommembers` ON chatrooms.ID_ChatRoom = roommembers.ID_ChatRoom WHERE isPrivate=0")
     data = cursor.fetchall()
-    for entry in data:  #add all public rooms where user does not own
-        if(entry[3] == 0 and entry[2] != session['accountID']):
-            roomsVisible.add([entry[1],entry[0]])
-    #remove rooms where user is in 
-    roomsVisible.difference_update(roomsIn)
+    groupedRooms = list()   #raw list of [roomID,roomOwner,[roomMembers]]
+    tmpExistrooms = list()  #temporary list of roomID existing in groupList for reference
+    tmpRoomnames = list()   #reference list of [roomID,roomName]
+    for entry in data:
+        if entry[0] not in tmpExistrooms:
+            #new roomID, put into new grouped rooms
+            tmpExistrooms.append(entry[0])
+            members = list()
+            members.append(entry[6])
+            dataTuple = (entry[0],entry[2],members)
+            groupedRooms.append(dataTuple)
+            tmpRoomnames.append( (entry[0],entry[1]))
+        else:
+            #roomID exists. find index, append member into list
+            tgtIndex = tmpExistrooms.index(entry[0])
+            oldMembers = groupedRooms[tgtIndex][2]
+            oldMembers.append( (entry[6]) )
+            dataTuple = (entry[0],entry[2],oldMembers)
+            groupedRooms[tgtIndex] = (dataTuple)
+        #print(str(groupedRooms)) #View the grouping tuples
+    
+    #for each room group, check if user is member or owner
+    #if they are, disqualify the room from legibility
+    for roomGroup in groupedRooms:
+        if roomGroup[1] == session['accountID']:    #if owner
+            tmpExistrooms.remove(roomGroup[0])      #remove and proceed to next group
+        else:                                       #else not owner
+            for member in roomGroup[2]:             #check each member data
+                if member == session['accountID']:  #if any one member is user, disqualify
+                   tmpExistrooms.remove(roomGroup[0])
+                   break                            #and end the loop 
+    
+    #get the names of rooms that are eligible
+    roomsVisible = list()
+    for room in tmpExistrooms:
+        for roomName in tmpRoomnames:
+            if(roomName[0] == room):
+                roomsVisible.append(roomName[1])
 
     return render_template('Chat.html',contactAbleUsers = contactAbleUsers,roomsOwn=roomsOwn,roomsIn=roomsIn,roomsVisible=roomsVisible)
 
@@ -350,6 +382,8 @@ def createNewChat():
     chatName = request.form.get('chatName')         #String text    
     chatUsers = request.form.getlist('chatUsers')   #array of usernames allowed in chat
     chatPrivate = request.form.get('isPrivate')     #int value of 1(True) or 0(False)
+    print(chatUsers)
+    print(chatPrivate)
     #connect to DB
     conn = mysql.connect()
     cursor =conn.cursor()
@@ -367,12 +401,17 @@ def createNewChat():
             cursor.execute("SELECT ID_User FROM users WHERE Handle='"+member+"';")
             memberID = cursor.fetchone()[0]
             #add participant users
+            print("INSERT INTO roommembers (ID_ChatRoom,ID_Members) VALUES ("+str(roomID)+","+str(memberID)+");")
             cursor.execute("INSERT INTO roommembers (ID_ChatRoom,ID_Members) VALUES ("+str(roomID)+","+str(memberID)+");")
     except Exception as e:
         print(e)
         flash('Problem in creating chatroom: '+str(e))
     conn.close()
     return (redirect('/Chat'))
+
+@app.route("/AccessChat",methods=["POST"])
+def accessChat():
+    return render_template("ChatRoom.html")
 
 ####
 ## START

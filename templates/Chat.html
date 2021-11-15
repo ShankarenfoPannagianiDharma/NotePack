@@ -2,8 +2,7 @@
     <head>
         <link rel="stylesheet" href="{{ url_for('static',filename='styles/GeneralStyle.css') }}">
         <link rel="stylesheet" href="{{ url_for('static',filename='styles/ChatStyle.css') }}">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>   
-        <script src="{{ url_for('static',filename='javascripts/ChatFunctions.js') }}"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     </head>
     <body onload="onLoad()">
         {% with messages = get_flashed_messages() %}
@@ -24,7 +23,11 @@
                         {% for room in roomsOwn %}
                             <tr>
                                 <td>
-                                     <button class="btnFill">{{ room[0] }}</button>    
+                                    <form class="ListingForm" action="/AccessChat" id="accessOwnedChat" method="POST" target="chatContent">
+                                        <input type="hidden" name="roomType" value=0>
+                                        <input type="hidden" name="targetRoomName" value="{{ room }}">
+                                        <input type="submit" class="btnFill" value="{{ room }}">    
+                                    </form>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -35,7 +38,11 @@
                         {% for room in roomsIn %}
                             <tr>
                                 <td>
-                                     <button class="btnFill">{{ room[0] }}</button>    
+                                    <form class="ListingForm" action="/AccessChat" id="accessOwnedChat" method="POST" target="chatContent">
+                                        <input type="hidden" name="roomType" value=1>
+                                        <input type="hidden" name="targetRoomName" value="{{ room }}">
+                                        <input type="submit" class="btnFill" value="{{ room }}">    
+                                    </form>    
                                 </td>
                             </tr>
                         {% endfor %}
@@ -46,7 +53,11 @@
                         {% for room in roomsVisible %}
                             <tr>
                                 <td>
-                                     <button class="btnFill">{{ room[1] }}</button>    
+                                    <form class="ListingForm" action="/AccessChat" id="accessOwnedChat" method="POST" target="chatContent">
+                                        <input type="hidden" name="roomType" value=2>
+                                        <input type="hidden" name="targetRoomName" value="{{ room }}">
+                                        <input type="submit" class="btnFill" value="{{ room }}">    
+                                    </form>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -57,7 +68,7 @@
             </tr>
             <tr>
                 <td style="background-color: steelblue;">
-                    Chat Content
+                    <iframe name="chatContent"></iframe>
                 </td>
             </tr>
             <tr>
@@ -110,6 +121,5 @@
             document.getElementById("MainScreen").style.display = "table";
         }
 
-        
     </script>
 </html>

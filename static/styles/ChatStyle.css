@@ -30,4 +30,13 @@
     justify-content: center;
     height:100%;
     width: 100%;
+    padding-top: 7px;
+    padding-bottom: 7px;
 }
+
+.ListingForm{
+    display: inline;
+    float:none;
+    padding: 0%;
+}
+
