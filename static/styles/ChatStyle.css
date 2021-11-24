@@ -40,3 +40,11 @@
     padding: 0%;
 }
 
+table{
+    width: 100%;
+}
+
+.textTable{
+    height: 90%;
+    table-layout:fixed;
+}

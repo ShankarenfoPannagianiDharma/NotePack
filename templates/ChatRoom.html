@@ -2,8 +2,66 @@
     <head>
         <link rel="stylesheet" href="{{ url_for('static',filename='styles/GeneralStyle.css') }}">
         <link rel="stylesheet" href="{{ url_for('static',filename='styles/ChatStyle.css') }}">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     </head>
     <body>
-        YOU IN CHATROOM
+        <table>
+            <!-- List all text messages -->
+            <thead>
+                <td><h2>{{ RName }}</h2></td>
+            </thead>
+            <tr>
+                <td>
+                    <table class='textTable'>
+                        {% for text in RTexts %} 
+                            <tr>                <!-- is user -->
+                                {% if text[0] == currentUser %}
+                                    <td colspan="5" style="text-align: right;">
+                                        {{ text[2] }}
+                                    </td>
+                                    <td style="text-align: right;">
+                                        {{ text[1] }}
+                                    </td>       <!-- is NOT user -->
+                                {% elif text[0] != currentUser %}
+                                    <td>
+                                        {{ text[1] }}
+                                    </td>
+                                    <td colspan="5">
+                                        {{ text[2] }}
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </td>
+            </tr>
+            <!-- Control to send text -->
+            <tr>
+                <td style="height: 20px;">
+                    <form id="sendChat" action="/PostChatText" method="POST">
+                        <input type="hidden" id="tgtRoomId" name="tgtRoomId" value={{RId}}>
+                        <input type="text" id="chatToSend" name="chatToSend" placeholder="Chat message here..." style="width: 89%;">
+                        <input type="submit" id="SendToChat" value="Send" style="width: 10%; ;">
+                    </form>
+                </td>
+            </tr>
+        </table>
+
+        <script>
+            $("#SendToChat").submit(function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var url = form.attr('action');
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: form.serialize()
+                    });
+            });
+
+            $(document).ajaxStop(function(){
+                window.location.reload();
+            });
+        </script>
     </body>
 </html>
