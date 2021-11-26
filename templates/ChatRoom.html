@@ -9,25 +9,26 @@
             <!-- List all text messages -->
             <thead>
                 <td><h2>{{ RName }}</h2></td>
+                <td style="text-align: right;"><button class="Btn_tight" onclick="RefreshPage()">Refresh</button></td>
             </thead>
             <tr>
-                <td>
+                <td colspan="2">
                     <table class='textTable'>
                         {% for text in RTexts %} 
                             <tr>                <!-- is user -->
                                 {% if text[0] == currentUser %}
                                     <td colspan="5" style="text-align: right;">
-                                        {{ text[2] }}
+                                        <p class="textbox">{{ text[2] }}</p>
                                     </td>
                                     <td style="text-align: right;">
-                                        {{ text[1] }}
+                                        <p class="userbox">{{ text[1] }}</p>
                                     </td>       <!-- is NOT user -->
                                 {% elif text[0] != currentUser %}
                                     <td>
-                                        {{ text[1] }}
+                                        <p class="userbox">{{ text[1] }}</p>
                                     </td>
                                     <td colspan="5">
-                                        {{ text[2] }}
+                                        <p class="textbox">{{ text[2] }}</p>
                                     </td>
                                 {% endif %}
                             </tr>
@@ -37,10 +38,10 @@
             </tr>
             <!-- Control to send text -->
             <tr>
-                <td style="height: 20px;">
-                    <form id="sendChat" action="/PostChatText" method="POST">
+                <td style="height: 20px;" colspan="2">
+                    <form id="sendChat" action="/PostChatText" method="POST" >
                         <input type="hidden" id="tgtRoomId" name="tgtRoomId" value={{RId}}>
-                        <input type="text" id="chatToSend" name="chatToSend" placeholder="Chat message here..." style="width: 89%;">
+                        <input type="text" autocomplete="off" id="chatToSend" name="chatToSend" placeholder="Chat message here..." style="width: 89%;">
                         <input type="submit" id="SendToChat" value="Send" style="width: 10%; ;">
                     </form>
                 </td>
@@ -48,20 +49,21 @@
         </table>
 
         <script>
-            $("#SendToChat").submit(function(e) {
+            $("#sendChat").submit(function(e) {
                 e.preventDefault();
                 var form = $(this);
                 var url = form.attr('action');
                 $.ajax({
                     type: "POST",
                     url: url,
-                    data: form.serialize()
-                    });
+                    data: form.serialize(),
+                    success: location.reload()
+                });
             });
 
-            $(document).ajaxStop(function(){
-                window.location.reload();
-            });
+            function RefreshPage(){
+                location.reload();
+            }
         </script>
     </body>
 </html>

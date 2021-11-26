@@ -39,7 +39,7 @@
                         {% for room in roomsIn %}
                             <tr>
                                 <td>
-                                    <form class="ListingForm" action="/AccessChat" id="accessOwnedChat" method="POST" target="chatContent">
+                                    <form class="ListingForm" action="/AccessChat" id="accessMemberedChat" method="POST" target="chatContent">
                                         <input type="hidden" name="roomType" value=1>
                                         <input type="hidden" name="targetRoomID" value="{{ room[0] }}">
                                         <input type="hidden" name="targetRoomName" value="{{ room[1] }}">
@@ -55,7 +55,7 @@
                         {% for room in roomsVisible %}
                             <tr>
                                 <td>
-                                    <form class="ListingForm" action="/AccessChat" id="accessOwnedChat" method="POST" target="chatContent">
+                                    <form class="ListingForm" action="/AccessChat" id="accessPublicChat" method="POST" target="chatContent">
                                         <input type="hidden" name="roomType" value=2>
                                         <input type="hidden" name="targetRoomID" value="{{ room[0] }}">
                                         <input type="hidden" name="targetRoomName" value="{{ room[1] }}">
@@ -68,7 +68,7 @@
 
                 </td>
                 <td style="background-color: steelblue;" rowspan="3">
-                    <iframe name="chatContent"></iframe>
+                    <iframe class="chatContent" id="chatContent" name="chatContent" onload="ScrollToEnd();"></iframe>
                 </td>
             </tr>
             <tr>
@@ -116,6 +116,12 @@
         function CancelNewChatDialog(){
             document.getElementById("CreateNewChatDialog").style.display = "none";
             document.getElementById("MainScreen").style.display = "table";
+        }
+
+        //Scrolls iframe to the end
+        function ScrollToEnd(){
+            var $contents = $('#chatContent').contents();
+            $contents.scrollTop($contents.height());
         }
 
     </script>

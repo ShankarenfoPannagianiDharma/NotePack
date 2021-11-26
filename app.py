@@ -412,10 +412,16 @@ def createNewChat():
 
 @app.route("/AccessChat",methods=["POST"])
 def accessChat():
+    # #Debugmode get
+    # RType = 1
+    # RId = 11
+    # RName = "testchat"
+
     #get postdata
-    RType = request.form["roomType"]
-    RId = request.form["targetRoomID"]
-    RName = request.form["targetRoomName"]
+    if flask.request.method == 'POST':
+        RType = request.form["roomType"]
+        RId = request.form["targetRoomID"]
+        RName = request.form["targetRoomName"]
 
     #connect to DB
     conn = mysql.connect()
@@ -434,9 +440,8 @@ def accessChat():
     cursor.execute("SELECT chatmessages.ID_User,users.Handle,Content_Msg,Timestamp_Msg FROM chatmessages INNER JOIN users ON chatmessages.ID_User=users.ID_User WHERE ID_Chatroom="+str(RId)+" ORDER BY Timestamp_Msg ASC")
     data = cursor.fetchall()
     RTexts = data
-    print("Chat Loaded")
-    
-    return render_template("ChatRoom.html", RName=RName, ROwner=ROwner, RId=RId, RMembers=RMembers, RTexts=RTexts, currentUser=session["accountID"])
+    print("Chat loaded")
+    return render_template("ChatRoom.html", RId=RId, RName=RName, ROwner=ROwner, RType=RType, RMembers=RMembers, RTexts=RTexts, currentUser=session["accountID"])
 
 @app.route("/PostChatText", methods=["POST"])
 def addChatText():
@@ -457,8 +462,7 @@ def addChatText():
     except Exception as e:
         print(e)
         flash('Problem in creating chatroom: '+str(e))
-    
-    print("chat text POSTed finish")
+    print("Postchat done")
     return ('', 204)
 
 ####
