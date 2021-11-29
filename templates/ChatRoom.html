@@ -1,0 +1,229 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="{{ url_for('static',filename='styles/GeneralStyle.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static',filename='styles/ChatStyle.css') }}">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    </head>
+    <body>
+        <!-- invisible DIV popup for control -->
+        <div class="popupForm" id="ownerControls">
+            <form class="slimForm" action="/OwnerAddMember" id="OwnerAddMember" method="POST">
+                <input type="hidden" name="targetRoomID" value="{{ RId }}">
+                <label for="addMembers">Invite Users: </label>
+                <select name="addMembers" multiple required form="OwnerAddMember">
+                    <!-- If there are users, show options -->
+                    {% if ROtherUsers != null %}
+                        <!-- Loop available users -->
+                        {% for user in ROtherUsers %}
+                            <option value="{{ user[0] }}">{{ user[1] }}</option>
+                        {% endfor %}
+                    {% endif %}
+                </select><br>
+                <input type="submit" class="greenbtn, fullbtn" value="Add users to group">
+            </form>
+            <br>
+            <form class="slimForm" action="/OwnerKickMember" id="OwnerKickMember" method="POST">
+                <input type="hidden" name="targetRoomID" value="{{ RId }}">
+                <label for="remMember">Remove Member: </label>
+                <select name="remMember" required form="OwnerKickMember">
+                    <!-- If there are users, show options -->
+                    {% if RMembers != null %}
+                        <!-- Loop available users -->
+                        {% for user in RMembers %}
+                            <option value="{{ user[0] }}">{{ user[1] }}</option>
+                        {% endfor %}
+                    {% endif %}
+                </select><br>
+                <input type="submit" class="greenbtn, fullbtn" value="Remove users from group">
+            </form>
+            <br>
+            <form class="slimForm" action="/OwnerDeleteRoom" id="OwnerDeleteRoom" method="POST">
+                <input type="hidden" name="targetRoomID" value="{{ RId }}">
+                <input type="submit" class="greenbtn, redbtn" value="Delete Group">
+            </form>
+            <button class="solidCancel" onclick="closeForm()">Cancel</button>
+        </div>
+
+        <table>
+            <!-- List all text messages -->
+            <thead>
+                <td><h2>{{ RName }}</h2></td>
+                <td style="text-align: right;">
+                    <!-- if owner, button for controls (delete room, remove member, add member) -->
+                    {% if RType == '0' %}
+                        <button class="Btn_tight" onclick="openForm()">Control chat</button>
+                    {% endif %}
+                    <!-- if member, button to leave room -->
+                    {% if RType == '1' %}
+                        <form class="slimForm" action="/POSTLeaveGroup" id="LeaveGroupButton" method="POST">
+                            <input type="hidden" name="targetRoomID" value="{{ RId }}">
+                            <input type="hidden" name="targetRoomName" value="{{ RName }}">
+                            <input type="submit" class="greenbtn" value="Leave Group">
+                        </form>
+                    {% endif %}
+                    <!-- if observer, button to join -->
+                    {% if RType == '2' %}
+                        <form class="slimForm" action="/POSTJoinGroup" id="JoinGroupButton" method="POST">
+                            <input type="hidden" name="targetRoomID" value="{{ RId }}">
+                            <input type="hidden" name="targetRoomName" value="{{ RName }}">
+                            <input type="submit" class="greenbtn" value="Join Group">
+                        </form>
+                    {% endif %}
+                </td>
+                <td style="text-align: right; width: 1%;">
+                    <button class="Btn_tight" onclick="RefreshPage()">Refresh</button>
+                </td>
+            </thead>
+            <tr>
+                <td colspan="3">
+                    <table class='textTable'>
+                        {% for text in RTexts %} 
+                            <tr>                <!-- is user -->
+                                {% if text[0] == currentUser %}
+                                    <td colspan="5" style="text-align: right;">
+                                        <p class="textbox">{{ text[2] }}</p>
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <p class="userbox">{{ text[1] }}</p>
+                                    </td>       <!-- is NOT user -->
+                                {% elif text[0] != currentUser %}
+                                    <td>
+                                        <p class="userbox">{{ text[1] }}</p>
+                                    </td>
+                                    <td colspan="5">
+                                        <p class="textbox">{{ text[2] }}</p>
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </td>
+            </tr>
+            <!-- Control to send text -->
+            <!-- only if NOT an observer (group is public and not a member) -->
+            {% if RType != '2' %}
+                <tr>
+                    <td style="height: 20px;" colspan="3">
+                        <form id="sendChat" action="/PostChatText" method="POST" >
+                            <input type="hidden" id="tgtRoomId" name="tgtRoomId" value={{RId}}>
+                            <input type="text" autocomplete="off" id="chatToSend" name="chatToSend" placeholder="Chat message here..." style="width: 89%;">
+                            <input type="submit" id="SendToChat" value="Send" style="width: 10%; ;">
+                        </form>
+                    </td>
+                </tr>
+            {% endif %}
+        </table>
+
+        <!-- invisible utility form to reload page on submit-->
+        <form class="invisibleForm" action="/AccessChat" id="reloadChat" method="POST">
+            <input type="hidden" name="roomType" value={{ RType }}>
+            <input type="hidden" name="targetRoomID" value="{{ RId }}">
+            <input type="hidden" name="targetRoomName" value="{{ RName }}">
+        </form>  
+
+        <script>
+            $("#sendChat").submit(function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var url = form.attr('action');
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: form.serialize(),
+                    success: function() {document.getElementById('reloadChat').submit()}
+                });
+            });
+
+            function RefreshPage(){
+                document.getElementById('reloadChat').submit()
+            }
+
+            //button functions to open/close popup forms
+            function openForm() 
+            {document.getElementById("ownerControls").style.display = "block";}
+            function closeForm() 
+            {document.getElementById("ownerControls").style.display = "none";}
+                
+            
+            //post for user to leave the group
+            $("#LeaveGroupButton").submit(function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var url = form.attr('action');  
+
+                //once done leaving group, reset parent window
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: form.serialize(),
+                    success: function() {window.parent.document.location.replace("/Chat")}
+                });
+            })
+            
+            //post for user to join the target group
+            $("#JoinGroupButton").submit(function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var url = form.attr('action');  
+
+                //once joining group, refresh parent and load self
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: form.serialize(),
+                    success: function() {
+                        window.parent.document.location.replace("/Chat");
+                        document.getElementById('reloadChat').submit();
+                    }
+                });
+            })
+
+            //owner add a set of members
+            $("#OwnerAddMember").submit(function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var url = form.attr('action');  
+
+                //once joining group, refresh self
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: form.serialize(),
+                    success: function() {document.getElementById('reloadChat').submit();}
+                });
+            })
+
+            $("#OwnerKickMember").submit(function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var url = form.attr('action');  
+
+                //once joining group, refresh self
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: form.serialize(),
+                    success: function() {document.getElementById('reloadChat').submit();}
+                });
+            })
+            
+            $("#OwnerDeleteRoom").submit(function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var url = form.attr('action');  
+
+                //once joining group, refresh parent and load self
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: form.serialize(),
+                    success: function() {
+                        window.parent.document.getElementById("chatContent").src="about:blank";
+                        window.parent.document.location="/Chat";
+                    }
+                });
+            })
+            
+        </script>
+    </body>
+</html>

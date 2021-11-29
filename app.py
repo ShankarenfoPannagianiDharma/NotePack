@@ -195,7 +195,79 @@ def ItemTablesList():
 
 @app.route('/Chat')
 def Chat():
-    return render_template('Chat.html')
+    #connect to db
+    conn = mysql.connect()
+    cursor =conn.cursor()
+    contactAbleUsers = list()
+    #get list of all users that can be chatted with
+    cursor.execute("SELECT * FROM users WHERE NOT ID_User="+str(session['accountID'])+";")
+    data = cursor.fetchall()
+    for entry in data:
+        #if there are other users, add to list
+        contactAbleUsers.append([entry[1]])
+
+    #get list of rooms where user is owner of 
+    roomsOwn = set()
+    cursor.execute("SELECT * FROM `chatrooms` WHERE ID_RoomOwner="+str(session['accountID'])+";")
+    data = cursor.fetchall()
+    for entry in data:
+        roomsOwn.add( tuple([entry[0],entry[1]]) )   #add (roomID, roomName)
+
+    #get joined data of rooms and its members
+    cursor.execute("SELECT * FROM `chatrooms` INNER JOIN `roommembers` ON chatrooms.ID_ChatRoom = roommembers.ID_ChatRoom;")
+    data = cursor.fetchall()
+
+    #get list of rooms where user is NOT an owner BUT a member of 
+    roomsIn = set()
+    for entry in data:
+        if(entry[2] != session['accountID'] and entry[6] == session['accountID']):
+            roomsIn.add( tuple( [entry[0],entry[1]] ) )    #add (roomID, roomName)
+
+    #get list of rooms user can see (public) but not in or own
+    #get all member rows where rooms are public
+    cursor.execute("SELECT * FROM `chatrooms` INNER JOIN `roommembers` ON chatrooms.ID_ChatRoom = roommembers.ID_ChatRoom WHERE isPrivate=0")
+    data = cursor.fetchall()
+    groupedRooms = list()   #raw list of [roomID,roomOwner,[roomMembers]]
+    tmpExistrooms = list()  #temporary list of roomID existing in groupList for reference
+    tmpRoomnames = list()   #reference list of [roomID,roomName]
+    for entry in data:
+        if entry[0] not in tmpExistrooms:
+            #new roomID, put into new grouped rooms
+            tmpExistrooms.append(entry[0])
+            members = list()
+            members.append(entry[6])
+            dataTuple = (entry[0],entry[2],members)
+            groupedRooms.append(dataTuple)
+            tmpRoomnames.append( (entry[0],entry[1]))
+        else:
+            #roomID exists. find index, append member into list
+            tgtIndex = tmpExistrooms.index(entry[0])
+            oldMembers = groupedRooms[tgtIndex][2]
+            oldMembers.append( (entry[6]) )
+            dataTuple = (entry[0],entry[2],oldMembers)
+            groupedRooms[tgtIndex] = (dataTuple)
+        #print(str(groupedRooms)) #View the grouping tuples
+    
+    #for each room group, check if user is member or owner
+    #if they are, disqualify the room from legibility
+    for roomGroup in groupedRooms:
+        if roomGroup[1] == session['accountID']:    #if owner
+            tmpExistrooms.remove(roomGroup[0])      #remove and proceed to next group
+        else:                                       #else not owner
+            for member in roomGroup[2]:             #check each member data
+                if member == session['accountID']:  #if any one member is user, disqualify
+                   tmpExistrooms.remove(roomGroup[0])
+                   break                            #and end the loop 
+    
+    #get the names of rooms that are eligible
+    roomsVisible = list()
+    for room in tmpExistrooms:
+        for roomName in tmpRoomnames:
+            if(roomName[0] == room):
+                roomsVisible.append( tuple( [room,roomName[1]] ) )
+
+    return render_template('Chat.html',contactAbleUsers = contactAbleUsers,roomsOwn=roomsOwn,roomsIn=roomsIn,roomsVisible=roomsVisible)
+
 @app.route('/Notes', methods=["GET","POST"])
 def Notes():
     allFolders = list()
@@ -303,8 +375,233 @@ def saveNoteOp():
 
     return ('', 204)
         
+#POST action to create new chat group
+@app.route("/POSTNewChatGroup", methods=["POST"])
+def createNewChat():
+    
+    chatName = request.form.get('chatName')         #String text    
+    chatUsers = request.form.getlist('chatUsers')   #array of usernames allowed in chat
+    chatPrivate = request.form.get('isPrivate')     #int value of 1(True) or 0(False)
+    print(chatUsers)
+    print(chatPrivate)
+    #connect to DB
+    conn = mysql.connect()
+    cursor =conn.cursor()
+    #Make DB chatroom
+    try:
+        cursor.execute("INSERT INTO chatrooms (RoomName,ID_RoomOwner,isPrivate) VALUES ('"+chatName+"',"+str(session['accountID'])+","+chatPrivate+")")
+        conn.commit()
+        #get this specific room's ID
+        cursor.execute("SELECT ID_ChatRoom FROM chatrooms WHERE RoomName='"+chatName+"' AND ID_RoomOwner="+str(session['accountID'])+";")
+        data = cursor.fetchone()
+        roomID = data[0]
+        #insert room members into DB
+        for member in chatUsers:
+            #find member ID
+            cursor.execute("SELECT ID_User FROM users WHERE Handle='"+member+"';")
+            memberID = cursor.fetchone()[0]
+            #add participant users 
+            #print("INSERT INTO roommembers (ID_ChatRoom,ID_Members) VALUES ("+str(roomID)+","+str(memberID)+");")
+            cursor.execute("INSERT INTO roommembers (ID_ChatRoom,ID_Members) VALUES ("+str(roomID)+","+str(memberID)+");")
+    except Exception as e:
+        print(e)
+        flash('Problem in creating chatroom: '+str(e))
+    conn.commit()
+    conn.close()
+    return (redirect('/Chat'))
+
+@app.route("/AccessChat",methods=["POST"])
+def accessChat():
+    # #Debugmode get
+    # RType = 1
+    # RId = 11
+    # RName = "testchat"
+
+    #get postdata
+    if flask.request.method == 'POST':
+        RType = request.form["roomType"]
+        RId = request.form["targetRoomID"]
+        RName = request.form["targetRoomName"]
+
+    #connect to DB
+    conn = mysql.connect()
+    cursor =conn.cursor()
+    #get owner of room
+    cursor.execute("SELECT ID_RoomOwner, users.Handle FROM chatrooms INNER JOIN users on chatrooms.ID_RoomOwner=users.ID_User WHERE ID_Chatroom="+str(RId))
+    data=cursor.fetchone()
+    ROwner = tuple( [data[0],data[1]] )
+
+    #get all members in chatroom
+    cursor.execute("SELECT roommembers.ID_Members, users.Handle FROM `chatrooms` INNER JOIN `roommembers` ON chatrooms.ID_ChatRoom = roommembers.ID_ChatRoom INNER JOIN `users` ON roommembers.ID_Members = users.ID_User WHERE chatrooms.ID_ChatRoom="+str(RId))
+    data= cursor.fetchall()
+    RMembers = list()
+    for entry in data:
+        tempTuple = ( [entry[0],entry[1]] )
+        RMembers.append( tempTuple )   #add (userID, userName)
+    print("Members: "+str(RMembers))
+
+    #get all users that are not member or owner
+    #get all users first
+    cursor.execute("SELECT ID_User, Handle FROM users")
+    data = cursor.fetchall()
+    ROtherUsers = list()
+    #go through all users
+    for entry in data:
+        print("User ID: "+str(entry[0]))
+        #check if user is owner
+        if entry[0] != ROwner[0]:
+            #check if user is a member
+            if RMembers:
+                aMember = False
+                for member in RMembers:
+                    if member[0] == entry[0]:
+                        #if user is a member, flag
+                        aMember = True     
+                
+                if(not aMember):
+                    print("not a member")
+                    tempTuple = ( [entry[0],entry[1]] )
+                    ROtherUsers.append( tempTuple )
+            else:   #if no members, add to list
+                print("    No members, add")
+                tempTuple = ( [entry[0],entry[1]] )
+                ROtherUsers.append( tempTuple )
+        else:   #if owner, continue
+            print("    is owner, skip")
+            continue
+
+    #get all the texts in chatroom
+    cursor.execute("SELECT chatmessages.ID_User,users.Handle,Content_Msg,Timestamp_Msg FROM chatmessages INNER JOIN users ON chatmessages.ID_User=users.ID_User WHERE ID_Chatroom="+str(RId)+" ORDER BY Timestamp_Msg ASC")
+    data = cursor.fetchall()
+    RTexts = data
+
+    print("chatroom loaded")
+    print("Other Users: "+str(ROtherUsers))
+    return render_template("ChatRoom.html", RId=RId, RName=RName, ROwner=ROwner, RType=RType, RMembers=RMembers, RTexts=RTexts, currentUser=session["accountID"], ROtherUsers=ROtherUsers)
+
+@app.route("/PostChatText", methods=["POST"])
+def addChatText():
+    # get post data
+    senderID = session['accountID']
+    tgtChtRm = request.form["tgtRoomId"]
+    chatText = request.form["chatToSend"]
+    
+    #connect to DB
+    conn = mysql.connect()
+    cursor = conn.cursor()
+
+    #put chat data into database
+    try:
+        cursor.execute("INSERT INTO chatmessages (ID_ChatRoom,ID_User,Content_Msg,Timestamp_Msg) VALUES ("+str(tgtChtRm)+","+str(senderID)+",'"+chatText+"',NOW());")
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(e)
+        flash('Problem in creating chatroom: '+str(e))
+    print("Postchat done")
+    return ('', 204)
+
+@app.route("/POSTLeaveGroup", methods=["POST"])
+def postLeaveChat():
+    # get post data
+    senderID = session['accountID']
+    tgtChtRm = request.form["targetRoomID"]
+    
+    #connect to DB
+    conn = mysql.connect()
+    cursor = conn.cursor()
+
+    #delete self from groupMembers 
+    try:
+        cursor.execute("DELETE FROM roommembers WHERE ID_Chatroom="+str(tgtChtRm)+" AND ID_Members="+str(senderID))
+        conn.commit()
+        conn.close()
+        print("DELETE FROM roommembers WHERE ID_Chatroom="+str(tgtChtRm)+" AND ID_Members="+str(senderID))
+    except Exception as e:
+        print(e)
+        flash('Problem in leaving chatroom: '+str(e))
+    flash("Left group " + request.form['targetRoomName'])    
+    return ('', 204)
+@app.route("/POSTJoinGroup", methods=["POST"])
+def postJoinChat():
+    # get post data
+    senderID = session['accountID']
+    tgtChtRm = request.form["targetRoomID"]
+    
+    #connect to DB
+    conn = mysql.connect()
+    cursor = conn.cursor()
+
+    #insert self from groupMembers 
+    try:
+        cursor.execute("INSERT INTO roommembers (ID_ChatRoom,ID_Members) VALUES ("+str(tgtChtRm)+","+str(senderID)+");")
+        conn.commit()
+        conn.close()
+        print("INSERT INTO roommembers (ID_ChatRoom,ID_Members) VALUES ("+str(tgtChtRm)+","+str(senderID)+");")
+    except Exception as e:
+        print(e)
+        flash('Problem in joining chatroom: '+str(e))
+    flash("Joined group " + request.form['targetRoomName'])    
+    return ('', 204)
+
+@app.route("/OwnerAddMember", methods=["POST"])
+def chatOwnerAddMember():
+    tgtChtRm = request.form.get('targetRoomID')         
+    newMembers = request.form.getlist('addMembers')
+    #connect to DB
+    conn = mysql.connect()
+    cursor = conn.cursor()
+    try:
+        #insert users to groupMembers 
+        for user in newMembers:
+            cursor.execute("INSERT INTO roommembers (ID_ChatRoom,ID_Members) VALUES ("+str(tgtChtRm)+","+str(user)+");")
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(e)
+        flash('Problem in adding members: '+str(e)) 
+    return ('', 204)
+
+
+@app.route("/OwnerKickMember", methods=["POST"])
+def chatOwnerRemMember():
+    tgtChtRm = request.form.get('targetRoomID')         
+    newMember = request.form.get('remMember')
+    #connect to DB
+    conn = mysql.connect()
+    cursor = conn.cursor()
+    print(newMember)
+    try:
+        #remove groupMember
+        cursor.execute("DELETE FROM roommembers WHERE ID_Chatroom="+str(tgtChtRm)+" AND ID_Members="+str(newMember))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(e)
+        flash('Problem in adding members: '+str(e)) 
+    return ('', 204)
+
+@app.route("/OwnerDeleteRoom", methods=["POST"])
+def chatOwnerDelete():
+    targetRoomID = request.form.get('targetRoomID')
+
+    #connect to DB
+    conn = mysql.connect()
+    cursor = conn.cursor()
+    try:
+        #delete specific room -> should cascade delete rooms, roomMembers and chats
+        cursor.execute("DELETE FROM chatrooms WHERE ID_Chatroom="+str(targetRoomID))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(e)
+        flash('Problem in closing chatroom: '+str(e)) 
+    return ('', 204)
+
+
+
 ####
-## START
+## START camera capture functions
 ####
 import base64 
 import boto3
