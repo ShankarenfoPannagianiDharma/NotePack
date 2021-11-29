@@ -48,7 +48,7 @@ CREATE TABLE `chatrooms` (
   `ID_RoomOwner` int(11) NOT NULL,
   `isPrivate` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`ID_ChatRoom`),
-  FOREIGN KEY (`ID_RoomOwner`) REFERENCES users(`ID_User`) ON DELETE CASCADE,
+  FOREIGN KEY (`ID_RoomOwner`) REFERENCES users(`ID_User`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --

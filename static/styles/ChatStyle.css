@@ -71,3 +71,52 @@ table{
     color: white;
     border-radius: 4px;
 }
+
+.invisibleForm{
+    display:none;
+}
+
+.slimForm{
+    background-color: transparent;
+}
+
+.greenbtn{
+    background-color: #04AA6D;
+    color: white;
+    width: auto;
+    height: auto;
+    padding: 5px;
+    border: none;
+    cursor: pointer;
+    opacity: 0.9;
+}
+
+.popupForm{
+    background-color: grey;
+    display: none;
+    position: absolute;
+    right: 5px;
+    border: 3px solid #f1f1f1;
+    z-index: 9;
+}
+
+.popupForm form{
+    border-style: solid;
+    background-color: ivory;
+}
+
+
+.fullbtn {
+    width: 100%;
+}
+
+.redbtn{
+    width: 100%;
+    background-color: indianred;
+}
+
+.solidCancel{
+    width: 100%;
+    background-color: lightcoral;
+    color: black;
+}

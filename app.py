@@ -401,7 +401,7 @@ def createNewChat():
             cursor.execute("SELECT ID_User FROM users WHERE Handle='"+member+"';")
             memberID = cursor.fetchone()[0]
             #add participant users 
-            print("INSERT INTO roommembers (ID_ChatRoom,ID_Members) VALUES ("+str(roomID)+","+str(memberID)+");")
+            #print("INSERT INTO roommembers (ID_ChatRoom,ID_Members) VALUES ("+str(roomID)+","+str(memberID)+");")
             cursor.execute("INSERT INTO roommembers (ID_ChatRoom,ID_Members) VALUES ("+str(roomID)+","+str(memberID)+");")
     except Exception as e:
         print(e)
@@ -434,14 +434,50 @@ def accessChat():
     #get all members in chatroom
     cursor.execute("SELECT roommembers.ID_Members, users.Handle FROM `chatrooms` INNER JOIN `roommembers` ON chatrooms.ID_ChatRoom = roommembers.ID_ChatRoom INNER JOIN `users` ON roommembers.ID_Members = users.ID_User WHERE chatrooms.ID_ChatRoom="+str(RId))
     data= cursor.fetchall()
-    RMembers = data
+    RMembers = list()
+    for entry in data:
+        tempTuple = ( [entry[0],entry[1]] )
+        RMembers.append( tempTuple )   #add (userID, userName)
+    print("Members: "+str(RMembers))
+
+    #get all users that are not member or owner
+    #get all users first
+    cursor.execute("SELECT ID_User, Handle FROM users")
+    data = cursor.fetchall()
+    ROtherUsers = list()
+    #go through all users
+    for entry in data:
+        print("User ID: "+str(entry[0]))
+        #check if user is owner
+        if entry[0] != ROwner[0]:
+            #check if user is a member
+            if RMembers:
+                aMember = False
+                for member in RMembers:
+                    if member[0] == entry[0]:
+                        #if user is a member, flag
+                        aMember = True     
+                
+                if(not aMember):
+                    print("not a member")
+                    tempTuple = ( [entry[0],entry[1]] )
+                    ROtherUsers.append( tempTuple )
+            else:   #if no members, add to list
+                print("    No members, add")
+                tempTuple = ( [entry[0],entry[1]] )
+                ROtherUsers.append( tempTuple )
+        else:   #if owner, continue
+            print("    is owner, skip")
+            continue
 
     #get all the texts in chatroom
     cursor.execute("SELECT chatmessages.ID_User,users.Handle,Content_Msg,Timestamp_Msg FROM chatmessages INNER JOIN users ON chatmessages.ID_User=users.ID_User WHERE ID_Chatroom="+str(RId)+" ORDER BY Timestamp_Msg ASC")
     data = cursor.fetchall()
     RTexts = data
-    print("Chat loaded")
-    return render_template("ChatRoom.html", RId=RId, RName=RName, ROwner=ROwner, RType=RType, RMembers=RMembers, RTexts=RTexts, currentUser=session["accountID"])
+
+    print("chatroom loaded")
+    print("Other Users: "+str(ROtherUsers))
+    return render_template("ChatRoom.html", RId=RId, RName=RName, ROwner=ROwner, RType=RType, RMembers=RMembers, RTexts=RTexts, currentUser=session["accountID"], ROtherUsers=ROtherUsers)
 
 @app.route("/PostChatText", methods=["POST"])
 def addChatText():
@@ -464,6 +500,105 @@ def addChatText():
         flash('Problem in creating chatroom: '+str(e))
     print("Postchat done")
     return ('', 204)
+
+@app.route("/POSTLeaveGroup", methods=["POST"])
+def postLeaveChat():
+    # get post data
+    senderID = session['accountID']
+    tgtChtRm = request.form["targetRoomID"]
+    
+    #connect to DB
+    conn = mysql.connect()
+    cursor = conn.cursor()
+
+    #delete self from groupMembers 
+    try:
+        cursor.execute("DELETE FROM roommembers WHERE ID_Chatroom="+str(tgtChtRm)+" AND ID_Members="+str(senderID))
+        conn.commit()
+        conn.close()
+        print("DELETE FROM roommembers WHERE ID_Chatroom="+str(tgtChtRm)+" AND ID_Members="+str(senderID))
+    except Exception as e:
+        print(e)
+        flash('Problem in leaving chatroom: '+str(e))
+    flash("Left group " + request.form['targetRoomName'])    
+    return ('', 204)
+@app.route("/POSTJoinGroup", methods=["POST"])
+def postJoinChat():
+    # get post data
+    senderID = session['accountID']
+    tgtChtRm = request.form["targetRoomID"]
+    
+    #connect to DB
+    conn = mysql.connect()
+    cursor = conn.cursor()
+
+    #insert self from groupMembers 
+    try:
+        cursor.execute("INSERT INTO roommembers (ID_ChatRoom,ID_Members) VALUES ("+str(tgtChtRm)+","+str(senderID)+");")
+        conn.commit()
+        conn.close()
+        print("INSERT INTO roommembers (ID_ChatRoom,ID_Members) VALUES ("+str(tgtChtRm)+","+str(senderID)+");")
+    except Exception as e:
+        print(e)
+        flash('Problem in joining chatroom: '+str(e))
+    flash("Joined group " + request.form['targetRoomName'])    
+    return ('', 204)
+
+@app.route("/OwnerAddMember", methods=["POST"])
+def chatOwnerAddMember():
+    tgtChtRm = request.form.get('targetRoomID')         
+    newMembers = request.form.getlist('addMembers')
+    #connect to DB
+    conn = mysql.connect()
+    cursor = conn.cursor()
+    try:
+        #insert users to groupMembers 
+        for user in newMembers:
+            cursor.execute("INSERT INTO roommembers (ID_ChatRoom,ID_Members) VALUES ("+str(tgtChtRm)+","+str(user)+");")
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(e)
+        flash('Problem in adding members: '+str(e)) 
+    return ('', 204)
+
+
+@app.route("/OwnerKickMember", methods=["POST"])
+def chatOwnerRemMember():
+    tgtChtRm = request.form.get('targetRoomID')         
+    newMember = request.form.get('remMember')
+    #connect to DB
+    conn = mysql.connect()
+    cursor = conn.cursor()
+    print(newMember)
+    try:
+        #remove groupMember
+        cursor.execute("DELETE FROM roommembers WHERE ID_Chatroom="+str(tgtChtRm)+" AND ID_Members="+str(newMember))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(e)
+        flash('Problem in adding members: '+str(e)) 
+    return ('', 204)
+
+@app.route("/OwnerDeleteRoom", methods=["POST"])
+def chatOwnerDelete():
+    targetRoomID = request.form.get('targetRoomID')
+
+    #connect to DB
+    conn = mysql.connect()
+    cursor = conn.cursor()
+    try:
+        #delete specific room -> should cascade delete rooms, roomMembers and chats
+        cursor.execute("DELETE FROM chatrooms WHERE ID_Chatroom="+str(targetRoomID))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(e)
+        flash('Problem in closing chatroom: '+str(e)) 
+    return ('', 204)
+
+
 
 ####
 ## START camera capture functions

@@ -90,7 +90,7 @@
                     {% if contactAbleUsers != null %}
                         <!-- Loop available users -->
                         {% for userName in contactAbleUsers %}
-                            <option value="{{ userName }}">{{ userName }}</option>
+                            <option value="{{ userName[0] }}">{{ userName[0] }}</option>
                         {% endfor %}
                     {% endif %}
                     
