@@ -1,0 +1,18 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="{{ url_for('static',filename='styles/GeneralStyle.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static',filename='styles/RecommendsStyle.css') }}">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    </head>
+    <body>
+        <ol>
+            <!-- If there are books, show options -->
+            {% if recBooks != null %}
+            <!-- Loop available users -->
+            {% for book in recBooks %}
+                <li>{{ book }}</li>
+            {% endfor %}
+        {% endif %}
+        </ol>
+    </body>
+</html>
