@@ -19,6 +19,10 @@ function switchFrameToReminders(){
     var frame = document.getElementById("OperatingWindow")
     frame.src = "Reminders"
 }
+function switchFrameToRecommends(){
+    var frame = document.getElementById("OperatingWindow")
+    frame.src = "Recommends"
+}
 
 //simple goto links
 function gotoZoom(){

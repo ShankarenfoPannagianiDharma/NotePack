@@ -2,6 +2,8 @@ import os, shutil ,re, flask
 from flask import Flask, request, redirect, flash, render_template, session, send_file
 from flaskext.mysql import MySQL
 import re
+import csv
+from RecomendSys import BookRecommender
 
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 1
@@ -299,10 +301,25 @@ def Profile():
     data = cursor.fetchone()
 
     return render_template('Profile.html', userData=data)
+
 @app.route('/Reminders')
 def Reminders():
     return render_template('Reminders.html')
 
+@app.route('/Recommends')
+def Recommends():
+    books = set()
+    #get books in csv data
+    with open('static/books.csv', encoding='utf-8', errors='ignore') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',')
+        line_count = 0
+        for row in reader:
+            if line_count == 0:
+                line_count += 1
+            else:
+                books.add(row[1])
+
+    return render_template('Recommends.html', books=books)
     
 @app.route('/POSTUploadFile', methods=["POST"])
 def POSTFile():
@@ -598,7 +615,11 @@ def chatOwnerDelete():
         flash('Problem in closing chatroom: '+str(e)) 
     return ('', 204)
 
-
+@app.route("/findRecommends", methods=['POST'])
+def findRecommends():
+    book_name = request.form.get('baseBook')
+    recBooks = BookRecommender(book_name)
+    return render_template('BookRecommends.html', recBooks=recBooks)
 
 ####
 ## START camera capture functions

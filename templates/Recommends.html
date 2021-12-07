@@ -1,0 +1,33 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="{{ url_for('static',filename='styles/GeneralStyle.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static',filename='styles/RecommendsStyle.css') }}">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    </head>
+    <body>
+        <form action="/findRecommends" id="runRecommends" method="POST" target="recommends">
+            <select id="baseBook" name="baseBook" required form="runRecommends" class="bookSelect">
+                <!-- If there are books, show options -->
+                {% if books != null %}
+                    <!-- Loop available users -->
+                    {% for book in books %}
+                        <option value="{{ book }}">{{ book }}</option>
+                    {% endfor %}
+                {% endif %}
+            </select>
+            <input type="submit" class="bookSubmit" value="find recommendations">
+        </form>
+        <iframe id="recommends" name="recommends" class="recsDisplay"></iframe>
+
+        <table>
+            <tr>
+                <td><img class="graphicdata" src="static/out1.png"></td>
+                <td><img class="graphicdata" src="static/out2.png"></td>
+            </tr>
+            </tr>
+                <td><img class="graphicdata" src="static/out3.png"></td>
+                <td><img class="graphicdata" src="static/out4.png"></td>
+            </tr>
+        </table>
+    </body>
+</html>

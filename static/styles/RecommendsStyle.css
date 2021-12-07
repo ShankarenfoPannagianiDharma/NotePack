@@ -1,0 +1,20 @@
+.graphicdata{
+    width: 100%;
+}
+
+.recsDisplay{
+    width: 100%;
+    height: min-content;
+}
+
+.bookSelect{
+    width:83%;
+}
+
+.bookSubmit{
+    width:15%; 
+}
+
+.recommendedDisplay{
+    background-color:goldenrod;
+}
