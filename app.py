@@ -310,14 +310,14 @@ def Reminders():
 def Recommends():
     books = set()
     #get books in csv data
-    with open('static/data.csv', encoding='utf-8', errors='ignore') as csvfile:
+    with open('static/books.csv', encoding='utf-8', errors='ignore') as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         line_count = 0
         for row in reader:
             if line_count == 0:
                 line_count += 1
             else:
-                books.add(row[7])
+                books.add(row[1])
 
     return render_template('Recommends.html', books=books)
     
@@ -619,7 +619,7 @@ def chatOwnerDelete():
 def findRecommends():
     book_name = request.form.get('baseBook')
     recBooks = BookRecommender(book_name)
-    return render_template('recommendedBooks', recBooks=recBooks)
+    return render_template('BookRecommends.html', recBooks=recBooks)
 
 ####
 ## START camera capture functions

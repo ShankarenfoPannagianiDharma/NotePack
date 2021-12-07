@@ -89,8 +89,6 @@ print("RecommendSystem Generated, ready to go")
 def BookRecommender(book_name):
     book_list_name = []
     book_id = df2[df2['title'] == book_name].index
-    print(df2.info())
-    print(book_id)
     book_id = book_id[0]
     for newid in idlist[book_id]:
         book_list_name.append(df2.loc[newid].title)

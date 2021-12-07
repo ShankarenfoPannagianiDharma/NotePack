@@ -4,13 +4,13 @@
         <link rel="stylesheet" href="{{ url_for('static',filename='styles/RecommendsStyle.css') }}">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     </head>
-    <body>
+    <body class="recommendedDisplay">
         <ol>
             <!-- If there are books, show options -->
             {% if recBooks != null %}
             <!-- Loop available users -->
             {% for book in recBooks %}
-                <li>{{ book }}</li>
+                <strong><li>{{ book }}</li></strong>
             {% endfor %}
         {% endif %}
         </ol>

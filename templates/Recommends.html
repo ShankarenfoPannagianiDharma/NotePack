@@ -5,6 +5,20 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     </head>
     <body>
+        <form action="/findRecommends" id="runRecommends" method="POST" target="recommends">
+            <select id="baseBook" name="baseBook" required form="runRecommends" class="bookSelect">
+                <!-- If there are books, show options -->
+                {% if books != null %}
+                    <!-- Loop available users -->
+                    {% for book in books %}
+                        <option value="{{ book }}">{{ book }}</option>
+                    {% endfor %}
+                {% endif %}
+            </select>
+            <input type="submit" class="bookSubmit" value="find recommendations">
+        </form>
+        <iframe id="recommends" name="recommends" class="recsDisplay"></iframe>
+
         <table>
             <tr>
                 <td><img class="graphicdata" src="static/out1.png"></td>
@@ -15,19 +29,5 @@
                 <td><img class="graphicdata" src="static/out4.png"></td>
             </tr>
         </table>
-
-        <form action="/findRecommends" id="runRecommends" method="POST" target="recommends">
-            <select id="baseBook" name="baseBook" required form="runRecommends">
-                <!-- If there are books, show options -->
-                {% if books != null %}
-                    <!-- Loop available users -->
-                    {% for book in books %}
-                        <option value="{{ book }}">{{ book }}</option>
-                    {% endfor %}
-                {% endif %}
-            </select>
-            <input type="submit" value="find recommendations">
-        </form>
-        <iframe id="recommends" name="recommends" class="recsDisplay"></iframe>
     </body>
 </html>
